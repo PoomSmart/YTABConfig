@@ -73,13 +73,16 @@ static BOOL getValueFromInvocation(id target, SEL selector) {
     for (NSString *method in coldConfigMethods) {
         NSString *key = getKey(method);
         SEL selector = NSSelectorFromString(method);
-        BOOL result = getValueFromInvocation(coldConfig, selector);
-        [cache setObject:@(result) forKey:key];
+        if ([cache objectForKey:key] == nil) {
+            BOOL result = getValueFromInvocation(coldConfig, selector);
+            [cache setObject:@(result) forKey:key];
+        }
         YTSettingsSectionItem *methodSwitch = [%c(YTSettingsSectionItem) switchItemWithTitle:[NSString stringWithFormat:@"%@ (Cold)", method]
             titleDescription:nil
             accessibilityIdentifier:nil
-            switchOn:result
+            switchOn:[[cache objectForKey:key] boolValue]
             switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
+                [cache setObject:@(enabled) forKey:key];
                 [[NSUserDefaults standardUserDefaults] setBool:enabled forKey:key];
                 return YES;
             }
@@ -90,13 +93,16 @@ static BOOL getValueFromInvocation(id target, SEL selector) {
     for (NSString *method in hotConfigMethods) {
         NSString *key = getKey(method);
         SEL selector = NSSelectorFromString(method);
-        BOOL result = getValueFromInvocation(hotConfig, selector);
-        [cache setObject:@(result) forKey:key];
+        if ([cache objectForKey:key] == nil) {
+            BOOL result = getValueFromInvocation(hotConfig, selector);
+            [cache setObject:@(result) forKey:key];
+        }
         YTSettingsSectionItem *methodSwitch = [%c(YTSettingsSectionItem) switchItemWithTitle:[NSString stringWithFormat:@"%@ (Hot)", method]
             titleDescription:nil
             accessibilityIdentifier:nil
-            switchOn:result
+            switchOn:[[cache objectForKey:key] boolValue]
             switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
+                [cache setObject:@(enabled) forKey:key];
                 [[NSUserDefaults standardUserDefaults] setBool:enabled forKey:key];
                 return YES;
             }
