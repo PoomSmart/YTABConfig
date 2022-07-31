@@ -21,13 +21,17 @@ static NSString *getKey(NSString *method) {
     return [NSString stringWithFormat:@"%@%@", Prefix, method];
 }
 
+static BOOL getValue(NSString *method, NSString *methodKey) {
+    if ([defaults objectForKey:methodKey] == nil)
+        return [[cache objectForKey:getKey(method)] boolValue];
+    return [defaults boolForKey:methodKey];
+}
+
 static BOOL (*origFunction)(id const, SEL);
 static BOOL returnFunction(id const self, SEL _cmd) {
     NSString *method = NSStringFromSelector(_cmd);
     NSString *methodKey = getKey(method);
-    if ([defaults objectForKey:methodKey] == nil)
-        return [[cache objectForKey:getKey(method)] boolValue];
-    return [defaults boolForKey:methodKey];
+    return getValue(method, methodKey);
 }
 
 static BOOL getValueFromInvocation(id target, SEL selector) {
@@ -80,7 +84,7 @@ static BOOL getValueFromInvocation(id target, SEL selector) {
         YTSettingsSectionItem *methodSwitch = [%c(YTSettingsSectionItem) switchItemWithTitle:[NSString stringWithFormat:@"%@ (Cold)", method]
             titleDescription:nil
             accessibilityIdentifier:nil
-            switchOn:[[cache objectForKey:key] boolValue]
+            switchOn:getValue(method, key)
             switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
                 [cache setObject:@(enabled) forKey:key];
                 [[NSUserDefaults standardUserDefaults] setBool:enabled forKey:key];
@@ -100,7 +104,7 @@ static BOOL getValueFromInvocation(id target, SEL selector) {
         YTSettingsSectionItem *methodSwitch = [%c(YTSettingsSectionItem) switchItemWithTitle:[NSString stringWithFormat:@"%@ (Hot)", method]
             titleDescription:nil
             accessibilityIdentifier:nil
-            switchOn:[[cache objectForKey:key] boolValue]
+            switchOn:getValue(method, key)
             switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
                 [cache setObject:@(enabled) forKey:key];
                 [[NSUserDefaults standardUserDefaults] setBool:enabled forKey:key];
