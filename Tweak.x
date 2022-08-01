@@ -7,6 +7,11 @@
 
 BOOL didHook = NO;
 
+@interface NSCache (Private)
+@property (assign) BOOL evictsObjectsWhenApplicationEntersBackground; 
+@property (assign) BOOL evictsObjectsWithDiscardedContent; 
+@end
+
 @interface YTSettingsSectionItemManager (YTABConfig)
 - (void)updateYTABCSectionWithEntry:(id)entry;
 @end
@@ -166,6 +171,7 @@ static NSMutableArray <NSString *> *getBooleanMethods(Class clz) {
     if (!bundle.loaded) [bundle load];
     cache = [NSCache new];
     cache.name = @"YTABC";
+    cache.evictsObjectsWhenApplicationEntersBackground = NO;
     YTHotConfigClass = %c(YTHotConfig);
     YTColdConfigClass = %c(YTColdConfig);
     defaults = [NSUserDefaults standardUserDefaults];
