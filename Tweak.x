@@ -14,8 +14,8 @@ BOOL didHook = NO;
 Class YTColdConfigClass, YTHotConfigClass;
 static const NSInteger YTABCSection = 404;
 
-static NSCache <NSString *, NSNumber *> *cache;
-static NSUserDefaults *defaults;
+NSCache <NSString *, NSNumber *> *cache;
+NSUserDefaults *defaults;
 static NSMutableArray <NSString *> *hotConfigMethods;
 static NSMutableArray <NSString *> *coldConfigMethods;
 
@@ -162,14 +162,11 @@ static NSMutableArray <NSString *> *getBooleanMethods(Class clz) {
     NSBundle *bundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@/Frameworks/Module_Framework.framework", [[NSBundle mainBundle] bundlePath]]];
     if (!bundle.loaded) [bundle load];
     cache = [NSCache new];
+    cache.name = @"YTABC";
     YTHotConfigClass = %c(YTHotConfig);
     YTColdConfigClass = %c(YTColdConfig);
     defaults = [NSUserDefaults standardUserDefaults];
     hotConfigMethods = getBooleanMethods(YTHotConfigClass);
     coldConfigMethods = getBooleanMethods(YTColdConfigClass);
     %init;
-}
-
-%dtor {
-    [cache removeAllObjects];
 }
