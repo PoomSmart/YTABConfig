@@ -5,6 +5,8 @@
 
 #define Prefix @"YTABC-"
 
+BOOL didHook = NO;
+
 @interface YTSettingsSectionItemManager (YTABConfig)
 - (void)updateYTABCSectionWithEntry:(id)entry;
 @end
@@ -91,7 +93,8 @@ static BOOL getValueFromInvocation(id target, SEL selector) {
                 return YES;
             }
             settingItemId:0];
-        MSHookMessageEx(YTColdConfigClass, selector, (IMP)returnFunction, (IMP *)&origFunction);
+        if (!didHook)
+            MSHookMessageEx(YTColdConfigClass, selector, (IMP)returnFunction, (IMP *)&origFunction);
         [sectionItems addObject:methodSwitch];
     }
     for (NSString *method in hotConfigMethods) {
@@ -111,7 +114,8 @@ static BOOL getValueFromInvocation(id target, SEL selector) {
                 return YES;
             }
             settingItemId:0];
-        MSHookMessageEx(YTHotConfigClass, selector, (IMP)returnFunction, (IMP *)&origFunction);
+        if (!didHook)
+            MSHookMessageEx(YTHotConfigClass, selector, (IMP)returnFunction, (IMP *)&origFunction);
         [sectionItems addObject:methodSwitch];
     }
     NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:@"title" ascending:YES];
@@ -123,6 +127,7 @@ static BOOL getValueFromInvocation(id target, SEL selector) {
         title:@"A/B"
         titleDescription:[NSString stringWithFormat:@"Here is the list of app configurations A/B by Google (%ld). Be absolutely sure of what you try to change here!", sectionItems.count]
         headerHidden:NO];
+    didHook = YES;
 }
 
 - (void)updateSectionForCategory:(NSUInteger)category withEntry:(id)entry {
@@ -135,14 +140,14 @@ static BOOL getValueFromInvocation(id target, SEL selector) {
 
 %end
 
-NSMutableArray <NSString *> *getBooleanMethods(Class clz) {
+static NSMutableArray <NSString *> *getBooleanMethods(Class clz) {
     NSMutableArray <NSString *> *allMethods = [NSMutableArray array];
     unsigned int methodCount = 0;
     Method *methods = class_copyMethodList(clz, &methodCount);
     for (unsigned int i = 0; i < methodCount; ++i) {
         Method method = methods[i];
         const char *name = sel_getName(method_getName(method));
-        if (strstr(name, "android") || strstr(name, "Android") || strstr(name, "musicClient")) continue;
+        if (strstr(name, "ndroid") || strstr(name, "musicClient")) continue;
         const char *encoding = method_getTypeEncoding(method);
         if (strcmp(encoding, "B16@0:8")) continue;
         NSString *selector = [NSString stringWithUTF8String:name];
