@@ -23,17 +23,22 @@ static NSString *getKey(NSString *method) {
     return [NSString stringWithFormat:@"%@%@", Prefix, method];
 }
 
-static BOOL getValue(NSString *method, NSString *methodKey) {
+static BOOL getValue(NSString *methodKey) {
     if ([defaults objectForKey:methodKey] == nil)
-        return [[cache objectForKey:getKey(method)] boolValue];
+        return [[cache objectForKey:methodKey] boolValue];
     return [defaults boolForKey:methodKey];
+}
+
+static void setValue(NSString *methodKey, BOOL value) {
+    [cache setObject:@(value) forKey:methodKey];
+    [defaults setBool:value forKey:methodKey];
 }
 
 static BOOL (*origFunction)(id const, SEL);
 static BOOL returnFunction(id const self, SEL _cmd) {
     NSString *method = NSStringFromSelector(_cmd);
     NSString *methodKey = getKey(method);
-    return getValue(method, methodKey);
+    return getValue(methodKey);
 }
 
 static BOOL getValueFromInvocation(id target, SEL selector) {
@@ -59,7 +64,6 @@ static BOOL getValueFromInvocation(id target, SEL selector) {
 
 %new(v@:@)
 - (void)updateYTABCSectionWithEntry:(id)entry {
-    YTSettingsViewController *delegate = [self valueForKey:@"_dataDelegate"];
     YTAppDelegate *appDelegate = (YTAppDelegate *)[[UIApplication sharedApplication] delegate];
     YTColdConfig *coldConfig = [appDelegate valueForKey:@"_coldConfig"];
     YTHotConfig *hotConfig = [appDelegate valueForKey:@"_hotConfig"];
@@ -83,13 +87,12 @@ static BOOL getValueFromInvocation(id target, SEL selector) {
             BOOL result = getValueFromInvocation(coldConfig, selector);
             [cache setObject:@(result) forKey:key];
         }
-        YTSettingsSectionItem *methodSwitch = [%c(YTSettingsSectionItem) switchItemWithTitle:[NSString stringWithFormat:@"%@ (Cold)", method]
+        YTSettingsSectionItem *methodSwitch = [%c(YTSettingsSectionItem) switchItemWithTitle:method
             titleDescription:nil
             accessibilityIdentifier:nil
-            switchOn:getValue(method, key)
+            switchOn:getValue(key)
             switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
-                [cache setObject:@(enabled) forKey:key];
-                [[NSUserDefaults standardUserDefaults] setBool:enabled forKey:key];
+                setValue(key, enabled);
                 return YES;
             }
             settingItemId:0];
@@ -104,13 +107,12 @@ static BOOL getValueFromInvocation(id target, SEL selector) {
             BOOL result = getValueFromInvocation(hotConfig, selector);
             [cache setObject:@(result) forKey:key];
         }
-        YTSettingsSectionItem *methodSwitch = [%c(YTSettingsSectionItem) switchItemWithTitle:[NSString stringWithFormat:@"%@ (Hot)", method]
+        YTSettingsSectionItem *methodSwitch = [%c(YTSettingsSectionItem) switchItemWithTitle:method
             titleDescription:nil
             accessibilityIdentifier:nil
-            switchOn:getValue(method, key)
+            switchOn:getValue(key)
             switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
-                [cache setObject:@(enabled) forKey:key];
-                [[NSUserDefaults standardUserDefaults] setBool:enabled forKey:key];
+                setValue(key, enabled);
                 return YES;
             }
             settingItemId:0];
@@ -121,11 +123,12 @@ static BOOL getValueFromInvocation(id target, SEL selector) {
     NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:@"title" ascending:YES];
     [sectionItems sortUsingDescriptors:@[sort]];
     [sectionItems insertObject:reset atIndex:0];
+    YTSettingsViewController *delegate = [self valueForKey:@"_dataDelegate"];
     [delegate
         setSectionItems:sectionItems
         forCategory:YTABCSection
         title:@"A/B"
-        titleDescription:[NSString stringWithFormat:@"Here is the list of app configurations A/B by Google (%ld). Be absolutely sure of what you try to change here!", sectionItems.count]
+        titleDescription:[NSString stringWithFormat:@"Here is the list of %ld YouTube app features. Be absolutely sure of what you try to change here!", sectionItems.count]
         headerHidden:NO];
     didHook = YES;
 }
@@ -141,7 +144,7 @@ static BOOL getValueFromInvocation(id target, SEL selector) {
 %end
 
 static NSMutableArray <NSString *> *getBooleanMethods(Class clz) {
-    NSMutableArray <NSString *> *allMethods = [NSMutableArray array];
+    NSMutableArray *allMethods = [NSMutableArray array];
     unsigned int methodCount = 0;
     Method *methods = class_copyMethodList(clz, &methodCount);
     for (unsigned int i = 0; i < methodCount; ++i) {
