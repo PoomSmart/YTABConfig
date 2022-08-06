@@ -39,7 +39,6 @@ static void setValue(NSString *methodKey, BOOL value) {
     [defaults setBool:value forKey:methodKey];
 }
 
-static BOOL (*origFunction)(id const, SEL);
 static BOOL returnFunction(id const self, SEL _cmd) {
     NSString *method = NSStringFromSelector(_cmd);
     NSString *methodKey = getKey(method);
@@ -102,7 +101,7 @@ static BOOL getValueFromInvocation(id target, SEL selector) {
             }
             settingItemId:0];
         if (!didHook)
-            MSHookMessageEx(YTColdConfigClass, selector, (IMP)returnFunction, (IMP *)&origFunction);
+            MSHookMessageEx(YTColdConfigClass, selector, (IMP)returnFunction, NULL);
         [sectionItems addObject:methodSwitch];
     }
     for (NSString *method in hotConfigMethods) {
@@ -122,7 +121,7 @@ static BOOL getValueFromInvocation(id target, SEL selector) {
             }
             settingItemId:0];
         if (!didHook)
-            MSHookMessageEx(YTHotConfigClass, selector, (IMP)returnFunction, (IMP *)&origFunction);
+            MSHookMessageEx(YTHotConfigClass, selector, (IMP)returnFunction, NULL);
         [sectionItems addObject:methodSwitch];
     }
     NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:@"title" ascending:YES];
@@ -172,6 +171,7 @@ static NSMutableArray <NSString *> *getBooleanMethods(Class clz) {
     cache = [NSCache new];
     cache.name = @"YTABC";
     cache.evictsObjectsWhenApplicationEntersBackground = NO;
+    cache.evictsObjectsWithDiscardedContent = NO;
     YTHotConfigClass = %c(YTHotConfig);
     YTColdConfigClass = %c(YTColdConfig);
     defaults = [NSUserDefaults standardUserDefaults];
