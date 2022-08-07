@@ -1,25 +1,23 @@
+#import "../YouTubeHeader/YTAlertView.h"
 #import "../YouTubeHeader/YTAppDelegate.h"
+#import "../YouTubeHeader/YTCommonUtils.h"
+#import "../YouTubeHeader/YTVersionUtils.h"
+#import "../YouTubeHeader/YTColdConfig.h"
+#import "../YouTubeHeader/YTHotConfig.h"
 #import "../YouTubeHeader/YTSettingsSectionItem.h"
 #import "../YouTubeHeader/YTSettingsSectionItemManager.h"
 #import "../YouTubeHeader/YTSettingsViewController.h"
 
 #define Prefix @"YTABC-"
-
-BOOL didHook = NO;
-
-@interface NSCache (Private)
-@property (assign) BOOL evictsObjectsWhenApplicationEntersBackground; 
-@property (assign) BOOL evictsObjectsWithDiscardedContent; 
-@end
+#define INCLUDED_CLASSES @"Included classes: YTColdConfig, YTHotConfig"
 
 @interface YTSettingsSectionItemManager (YTABConfig)
 - (void)updateYTABCSectionWithEntry:(id)entry;
 @end
 
-Class YTColdConfigClass, YTHotConfigClass;
 static const NSInteger YTABCSection = 404;
 
-NSCache <NSString *, NSNumber *> *cache;
+NSMutableDictionary <NSString *, NSNumber *> *cache;
 NSUserDefaults *defaults;
 static NSMutableArray <NSString *> *hotConfigMethods;
 static NSMutableArray <NSString *> *coldConfigMethods;
@@ -68,10 +66,82 @@ static BOOL getValueFromInvocation(id target, SEL selector) {
 
 %new(v@:@)
 - (void)updateYTABCSectionWithEntry:(id)entry {
-    YTAppDelegate *appDelegate = (YTAppDelegate *)[[UIApplication sharedApplication] delegate];
-    YTColdConfig *coldConfig = [appDelegate valueForKey:@"_coldConfig"];
-    YTHotConfig *hotConfig = [appDelegate valueForKey:@"_hotConfig"];
     NSMutableArray *sectionItems = [NSMutableArray array];
+    for (NSString *method in coldConfigMethods) {
+        NSString *key = getKey(method);
+        YTSettingsSectionItem *methodSwitch = [%c(YTSettingsSectionItem) switchItemWithTitle:method
+            titleDescription:nil
+            accessibilityIdentifier:nil
+            switchOn:getValue(key)
+            switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
+                setValue(key, enabled);
+                return YES;
+            }
+            settingItemId:0];
+        [sectionItems addObject:methodSwitch];
+    }
+    for (NSString *method in hotConfigMethods) {
+        NSString *key = getKey(method);
+        YTSettingsSectionItem *methodSwitch = [%c(YTSettingsSectionItem) switchItemWithTitle:method
+            titleDescription:nil
+            accessibilityIdentifier:nil
+            switchOn:getValue(key)
+            switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
+                setValue(key, enabled);
+                return YES;
+            }
+            settingItemId:0];
+        [sectionItems addObject:methodSwitch];
+    }
+    NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:@"title" ascending:YES];
+    [sectionItems sortUsingDescriptors:@[sort]];
+    YTSettingsSectionItem *copyAll = [%c(YTSettingsSectionItem)
+        itemWithTitle:@"Copy current settings"
+        titleDescription:@"Tap to copy the current settings to the clipboard."
+        accessibilityIdentifier:nil
+        detailTextBlock:nil
+        selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
+            UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
+            NSMutableArray *content = [NSMutableArray array];
+            [cache enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSNumber *value, BOOL* stop) {
+                NSString *displayKey = [key substringFromIndex:Prefix.length];
+                [content addObject:[NSString stringWithFormat:@"%@: %d", displayKey, [value boolValue]]];
+            }];
+            [content sortUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+            [content insertObject:[NSString stringWithFormat:@"Device model: %@", [%c(YTCommonUtils) hardwareModel]] atIndex:0];
+            [content insertObject:[NSString stringWithFormat:@"App version: %@", [%c(YTVersionUtils) appVersion]] atIndex:0];
+            [content insertObject:INCLUDED_CLASSES atIndex:0];
+            [content insertObject:[NSString stringWithFormat:@"YTABConfig version: %@", @(OS_STRINGIFY(TWEAK_VERSION))] atIndex:0];
+            pasteboard.string = [content componentsJoinedByString:@"\n"];
+            return YES;
+        }];
+    [sectionItems insertObject:copyAll atIndex:0];
+    YTSettingsSectionItem *modified = [%c(YTSettingsSectionItem)
+        itemWithTitle:@"View modified settings"
+        titleDescription:@"Tap to view all the changes you made manually."
+        accessibilityIdentifier:nil
+        detailTextBlock:nil
+        selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
+            NSMutableArray *features = [NSMutableArray array];
+            for (NSString *key in [defaults dictionaryRepresentation].allKeys) {
+                if ([key hasPrefix:Prefix]) {
+                    NSString *displayKey = [key substringFromIndex:Prefix.length];
+                    [features addObject:[NSString stringWithFormat:@"%@: %d", displayKey, [defaults boolForKey:key]]];
+                }
+            }
+            [features sortUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+            [features insertObject:[NSString stringWithFormat:@"Total: %ld", features.count] atIndex:0];
+            NSString *content = [features componentsJoinedByString:@"\n"];
+            YTAlertView *alertView = [%c(YTAlertView) confirmationDialogWithAction:^{
+                UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
+                pasteboard.string = content;
+            } actionTitle:@"Copy to clipboard"];
+            alertView.title = @"Changes";
+            alertView.subtitle = content;
+            [alertView show];
+            return YES;
+        }];
+    [sectionItems insertObject:modified atIndex:0];
     YTSettingsSectionItem *reset = [%c(YTSettingsSectionItem)
         itemWithTitle:@"Reset and Kill"
         titleDescription:@"Tap to undo all of your changes and kill the app."
@@ -84,48 +154,6 @@ static BOOL getValueFromInvocation(id target, SEL selector) {
             }
             exit(0);
         }];
-    for (NSString *method in coldConfigMethods) {
-        NSString *key = getKey(method);
-        SEL selector = NSSelectorFromString(method);
-        if ([cache objectForKey:key] == nil) {
-            BOOL result = getValueFromInvocation(coldConfig, selector);
-            [cache setObject:@(result) forKey:key];
-        }
-        YTSettingsSectionItem *methodSwitch = [%c(YTSettingsSectionItem) switchItemWithTitle:method
-            titleDescription:nil
-            accessibilityIdentifier:nil
-            switchOn:getValue(key)
-            switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
-                setValue(key, enabled);
-                return YES;
-            }
-            settingItemId:0];
-        if (!didHook)
-            MSHookMessageEx(YTColdConfigClass, selector, (IMP)returnFunction, NULL);
-        [sectionItems addObject:methodSwitch];
-    }
-    for (NSString *method in hotConfigMethods) {
-        NSString *key = getKey(method);
-        SEL selector = NSSelectorFromString(method);
-        if ([cache objectForKey:key] == nil) {
-            BOOL result = getValueFromInvocation(hotConfig, selector);
-            [cache setObject:@(result) forKey:key];
-        }
-        YTSettingsSectionItem *methodSwitch = [%c(YTSettingsSectionItem) switchItemWithTitle:method
-            titleDescription:nil
-            accessibilityIdentifier:nil
-            switchOn:getValue(key)
-            switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
-                setValue(key, enabled);
-                return YES;
-            }
-            settingItemId:0];
-        if (!didHook)
-            MSHookMessageEx(YTHotConfigClass, selector, (IMP)returnFunction, NULL);
-        [sectionItems addObject:methodSwitch];
-    }
-    NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:@"title" ascending:YES];
-    [sectionItems sortUsingDescriptors:@[sort]];
     [sectionItems insertObject:reset atIndex:0];
     YTSettingsViewController *delegate = [self valueForKey:@"_dataDelegate"];
     [delegate
@@ -134,7 +162,6 @@ static BOOL getValueFromInvocation(id target, SEL selector) {
         title:@"A/B"
         titleDescription:[NSString stringWithFormat:@"Here is the list of %ld YouTube app features. Be absolutely sure of what you try to change here!", sectionItems.count]
         headerHidden:NO];
-    didHook = YES;
 }
 
 - (void)updateSectionForCategory:(NSUInteger)category withEntry:(id)entry {
@@ -165,17 +192,46 @@ static NSMutableArray <NSString *> *getBooleanMethods(Class clz) {
     return allMethods;
 }
 
+%hook YTAppDelegate
+
+- (BOOL)application:(id)arg1 didFinishLaunchingWithOptions:(id)arg2 {
+    defaults = [NSUserDefaults standardUserDefaults];
+    YTColdConfig *coldConfig = [self valueForKey:@"_coldConfig"];
+    YTHotConfig *hotConfig = [self valueForKey:@"_hotConfig"];
+    Class YTColdConfigClass = [coldConfig class];
+    Class YTHotConfigClass = [hotConfig class];
+    hotConfigMethods = getBooleanMethods(YTHotConfigClass);
+    coldConfigMethods = getBooleanMethods(YTColdConfigClass);
+    for (NSString *method in coldConfigMethods) {
+        NSString *key = getKey(method);
+        SEL selector = NSSelectorFromString(method);
+        if ([cache objectForKey:key] == nil) {
+            BOOL result = getValueFromInvocation(coldConfig, selector);
+            [cache setObject:@(result) forKey:key];
+        }
+        MSHookMessageEx(YTColdConfigClass, selector, (IMP)returnFunction, NULL);
+    }
+    for (NSString *method in hotConfigMethods) {
+        NSString *key = getKey(method);
+        SEL selector = NSSelectorFromString(method);
+        if ([cache objectForKey:key] == nil) {
+            BOOL result = getValueFromInvocation(hotConfig, selector);
+            [cache setObject:@(result) forKey:key];
+        }
+        MSHookMessageEx(YTHotConfigClass, selector, (IMP)returnFunction, NULL);
+    }
+    return %orig;
+}
+
+%end
+
 %ctor {
     NSBundle *bundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@/Frameworks/Module_Framework.framework", [[NSBundle mainBundle] bundlePath]]];
     if (!bundle.loaded) [bundle load];
-    cache = [NSCache new];
-    cache.name = @"YTABC";
-    cache.evictsObjectsWhenApplicationEntersBackground = NO;
-    cache.evictsObjectsWithDiscardedContent = NO;
-    YTHotConfigClass = %c(YTHotConfig);
-    YTColdConfigClass = %c(YTColdConfig);
-    defaults = [NSUserDefaults standardUserDefaults];
-    hotConfigMethods = getBooleanMethods(YTHotConfigClass);
-    coldConfigMethods = getBooleanMethods(YTColdConfigClass);
+    cache = [NSMutableDictionary new];
     %init;
+}
+
+%dtor {
+    [cache removeAllObjects];
 }
