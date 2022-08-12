@@ -8,8 +8,9 @@
 #import "../YouTubeHeader/YTSettingsSectionItemManager.h"
 #import "../YouTubeHeader/YTSettingsViewController.h"
 
-#define Prefix @"YTABC-"
+#define Prefix @"YTABC"
 #define INCLUDED_CLASSES @"Included classes: YTColdConfig, YTHotConfig"
+#define EXCLUDED_METHODS @"Excluded settings: android* and musicClient*"
 
 @interface YTSettingsSectionItemManager (YTABConfig)
 - (void)updateYTABCSectionWithEntry:(id)entry;
@@ -17,29 +18,31 @@
 
 static const NSInteger YTABCSection = 404;
 
-NSMutableDictionary <NSString *, NSNumber *> *cache;
+NSMutableDictionary <NSString *, NSMutableDictionary <NSString *, NSNumber *> *> *cache;
 NSUserDefaults *defaults;
-static NSMutableArray <NSString *> *hotConfigMethods;
-static NSMutableArray <NSString *> *coldConfigMethods;
 
-static NSString *getKey(NSString *method) {
-    return [NSString stringWithFormat:@"%@%@", Prefix, method];
+static NSString *getKey(NSString *method, NSString *classKey) {
+    return [NSString stringWithFormat:@"%@.%@.%@", Prefix, classKey, method];
+}
+
+static NSString *getCacheKey(NSString *method, NSString *classKey) {
+    return [NSString stringWithFormat:@"%@.%@", classKey, method];
 }
 
 static BOOL getValue(NSString *methodKey) {
     if ([defaults objectForKey:methodKey] == nil)
-        return [[cache objectForKey:methodKey] boolValue];
+        return [[cache valueForKeyPath:[methodKey substringFromIndex:Prefix.length + 1]] boolValue];
     return [defaults boolForKey:methodKey];
 }
 
-static void setValue(NSString *methodKey, BOOL value) {
-    [cache setObject:@(value) forKey:methodKey];
-    [defaults setBool:value forKey:methodKey];
+static void setValue(NSString *method, NSString *classKey, BOOL value) {
+    [cache setValue:@(value) forKeyPath:getCacheKey(method, classKey)];
+    [defaults setBool:value forKey:getKey(method, classKey)];
 }
 
 static BOOL returnFunction(id const self, SEL _cmd) {
     NSString *method = NSStringFromSelector(_cmd);
-    NSString *methodKey = getKey(method);
+    NSString *methodKey = getKey(method, NSStringFromClass([self class]));
     return getValue(methodKey);
 }
 
@@ -67,31 +70,26 @@ static BOOL getValueFromInvocation(id target, SEL selector) {
 %new(v@:@)
 - (void)updateYTABCSectionWithEntry:(id)entry {
     NSMutableArray *sectionItems = [NSMutableArray array];
-    for (NSString *method in coldConfigMethods) {
-        NSString *key = getKey(method);
-        YTSettingsSectionItem *methodSwitch = [%c(YTSettingsSectionItem) switchItemWithTitle:method
+    for (NSString *classKey in cache) {
+        for (NSString *method in cache[classKey]) {
+            YTSettingsSectionItem *methodSwitch = [%c(YTSettingsSectionItem) switchItemWithTitle:method
             titleDescription:nil
             accessibilityIdentifier:nil
-            switchOn:getValue(key)
+            switchOn:getValue(getKey(method, classKey))
             switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
-                setValue(key, enabled);
+                setValue(method, classKey, enabled);
                 return YES;
             }
+            // selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
+            //     YTAlertView *alertView = [%c(YTAlertView) infoDialog];
+            //     alertView.title = method;
+            //     alertView.subtitle = [NSString stringWithFormat:@"-[%@ %@]", classKey, method];
+            //     [alertView show];
+            //     return YES;
+            // }
             settingItemId:0];
-        [sectionItems addObject:methodSwitch];
-    }
-    for (NSString *method in hotConfigMethods) {
-        NSString *key = getKey(method);
-        YTSettingsSectionItem *methodSwitch = [%c(YTSettingsSectionItem) switchItemWithTitle:method
-            titleDescription:nil
-            accessibilityIdentifier:nil
-            switchOn:getValue(key)
-            switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
-                setValue(key, enabled);
-                return YES;
-            }
-            settingItemId:0];
-        [sectionItems addObject:methodSwitch];
+            [sectionItems addObject:methodSwitch];
+        }
     }
     NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:@"title" ascending:YES];
     [sectionItems sortUsingDescriptors:@[sort]];
@@ -103,13 +101,15 @@ static BOOL getValueFromInvocation(id target, SEL selector) {
         selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
             UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
             NSMutableArray *content = [NSMutableArray array];
-            [cache enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSNumber *value, BOOL* stop) {
-                NSString *displayKey = [key substringFromIndex:Prefix.length];
-                [content addObject:[NSString stringWithFormat:@"%@: %d", displayKey, [value boolValue]]];
-            }];
+            for (NSString *classKey in cache) {
+                [cache[classKey] enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSNumber *value, BOOL* stop) {
+                    [content addObject:[NSString stringWithFormat:@"%@: %d", key, [value boolValue]]];
+                }];
+            }
             [content sortUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
             [content insertObject:[NSString stringWithFormat:@"Device model: %@", [%c(YTCommonUtils) hardwareModel]] atIndex:0];
             [content insertObject:[NSString stringWithFormat:@"App version: %@", [%c(YTVersionUtils) appVersion]] atIndex:0];
+            [content insertObject:EXCLUDED_METHODS atIndex:0];
             [content insertObject:INCLUDED_CLASSES atIndex:0];
             [content insertObject:[NSString stringWithFormat:@"YTABConfig version: %@", @(OS_STRINGIFY(TWEAK_VERSION))] atIndex:0];
             pasteboard.string = [content componentsJoinedByString:@"\n"];
@@ -125,7 +125,7 @@ static BOOL getValueFromInvocation(id target, SEL selector) {
             NSMutableArray *features = [NSMutableArray array];
             for (NSString *key in [defaults dictionaryRepresentation].allKeys) {
                 if ([key hasPrefix:Prefix]) {
-                    NSString *displayKey = [key substringFromIndex:Prefix.length];
+                    NSString *displayKey = [key substringFromIndex:Prefix.length + 1];
                     [features addObject:[NSString stringWithFormat:@"%@: %d", displayKey, [defaults boolForKey:key]]];
                 }
             }
@@ -192,6 +192,17 @@ static NSMutableArray <NSString *> *getBooleanMethods(Class clz) {
     return allMethods;
 }
 
+static void hookClass(NSMutableArray <NSString *> *methods, NSObject *instance, Class instanceClass) {
+    NSString *classKey = NSStringFromClass(instanceClass);
+    NSMutableDictionary *classCache = cache[classKey] = [NSMutableDictionary new];
+    for (NSString *method in methods) {
+        SEL selector = NSSelectorFromString(method);
+        BOOL result = getValueFromInvocation(instance, selector);
+        classCache[method] = @(result);
+        MSHookMessageEx(instanceClass, selector, (IMP)returnFunction, NULL);
+    }
+}
+
 %hook YTAppDelegate
 
 - (BOOL)application:(id)arg1 didFinishLaunchingWithOptions:(id)arg2 {
@@ -200,26 +211,8 @@ static NSMutableArray <NSString *> *getBooleanMethods(Class clz) {
     YTHotConfig *hotConfig = [self valueForKey:@"_hotConfig"];
     Class YTColdConfigClass = [coldConfig class];
     Class YTHotConfigClass = [hotConfig class];
-    hotConfigMethods = getBooleanMethods(YTHotConfigClass);
-    coldConfigMethods = getBooleanMethods(YTColdConfigClass);
-    for (NSString *method in coldConfigMethods) {
-        NSString *key = getKey(method);
-        SEL selector = NSSelectorFromString(method);
-        if ([cache objectForKey:key] == nil) {
-            BOOL result = getValueFromInvocation(coldConfig, selector);
-            [cache setObject:@(result) forKey:key];
-        }
-        MSHookMessageEx(YTColdConfigClass, selector, (IMP)returnFunction, NULL);
-    }
-    for (NSString *method in hotConfigMethods) {
-        NSString *key = getKey(method);
-        SEL selector = NSSelectorFromString(method);
-        if ([cache objectForKey:key] == nil) {
-            BOOL result = getValueFromInvocation(hotConfig, selector);
-            [cache setObject:@(result) forKey:key];
-        }
-        MSHookMessageEx(YTHotConfigClass, selector, (IMP)returnFunction, NULL);
-    }
+    hookClass(getBooleanMethods(YTColdConfigClass), coldConfig, YTColdConfigClass);
+    hookClass(getBooleanMethods(YTHotConfigClass), hotConfig, YTHotConfigClass);
     return %orig;
 }
 
