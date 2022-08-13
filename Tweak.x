@@ -2,6 +2,7 @@
 #import "../YouTubeHeader/YTAppDelegate.h"
 #import "../YouTubeHeader/YTCommonUtils.h"
 #import "../YouTubeHeader/YTVersionUtils.h"
+#import "../YouTubeHeader/YTGlobalConfig.h"
 #import "../YouTubeHeader/YTColdConfig.h"
 #import "../YouTubeHeader/YTHotConfig.h"
 #import "../YouTubeHeader/YTSettingsSectionItem.h"
@@ -9,7 +10,7 @@
 #import "../YouTubeHeader/YTSettingsViewController.h"
 
 #define Prefix @"YTABC"
-#define INCLUDED_CLASSES @"Included classes: YTColdConfig, YTHotConfig"
+#define INCLUDED_CLASSES @"Included classes: YTGlobalConfig, YTColdConfig, YTHotConfig"
 #define EXCLUDED_METHODS @"Excluded settings: android* and musicClient*"
 
 @interface YTSettingsSectionItemManager (YTABConfig)
@@ -192,7 +193,8 @@ static NSMutableArray <NSString *> *getBooleanMethods(Class clz) {
     return allMethods;
 }
 
-static void hookClass(NSMutableArray <NSString *> *methods, NSObject *instance, Class instanceClass) {
+static void hookClass(NSObject *instance, Class instanceClass) {
+    NSMutableArray <NSString *> *methods = getBooleanMethods(instanceClass);
     NSString *classKey = NSStringFromClass(instanceClass);
     NSMutableDictionary *classCache = cache[classKey] = [NSMutableDictionary new];
     for (NSString *method in methods) {
@@ -207,12 +209,12 @@ static void hookClass(NSMutableArray <NSString *> *methods, NSObject *instance, 
 
 - (BOOL)application:(id)arg1 didFinishLaunchingWithOptions:(id)arg2 {
     defaults = [NSUserDefaults standardUserDefaults];
+    YTGlobalConfig *globalConfig = [self valueForKey:@"_globalConfig"];
     YTColdConfig *coldConfig = [self valueForKey:@"_coldConfig"];
     YTHotConfig *hotConfig = [self valueForKey:@"_hotConfig"];
-    Class YTColdConfigClass = [coldConfig class];
-    Class YTHotConfigClass = [hotConfig class];
-    hookClass(getBooleanMethods(YTColdConfigClass), coldConfig, YTColdConfigClass);
-    hookClass(getBooleanMethods(YTHotConfigClass), hotConfig, YTHotConfigClass);
+    hookClass(globalConfig, [globalConfig class]);
+    hookClass(coldConfig, [coldConfig class]);
+    hookClass(hotConfig, [hotConfig class]);
     return %orig;
 }
 
