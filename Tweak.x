@@ -11,7 +11,7 @@
 
 #define Prefix @"YTABC"
 #define INCLUDED_CLASSES @"Included classes: YTGlobalConfig, YTColdConfig, YTHotConfig"
-#define EXCLUDED_METHODS @"Excluded settings: android* and musicClient*"
+#define EXCLUDED_METHODS @"Excluded settings: android*, amsterdam*, musicClient* and unplugged*"
 
 @interface YTSettingsSectionItemManager (YTABConfig)
 - (void)updateYTABCSectionWithEntry:(id)entry;
@@ -182,7 +182,7 @@ static NSMutableArray <NSString *> *getBooleanMethods(Class clz) {
     for (unsigned int i = 0; i < methodCount; ++i) {
         Method method = methods[i];
         const char *name = sel_getName(method_getName(method));
-        if (strstr(name, "ndroid") || strstr(name, "musicClient")) continue;
+        if (strstr(name, "ndroid") || strstr(name, "musicClient") || strstr(name, "amsterdam") || strstr(name, "unplugged")) continue;
         const char *encoding = method_getTypeEncoding(method);
         if (strcmp(encoding, "B16@0:8")) continue;
         NSString *selector = [NSString stringWithUTF8String:name];
