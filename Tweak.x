@@ -7,9 +7,12 @@
 #import "../YouTubeHeader/YTHotConfig.h"
 #import "../YouTubeHeader/YTSettingsSectionItem.h"
 #import "../YouTubeHeader/YTSettingsSectionItemManager.h"
+#import "../YouTubeHeader/YTSettingsPickerViewController.h"
 #import "../YouTubeHeader/YTSettingsViewController.h"
+#import "../YouTubeHeader/YTToastResponderEvent.h"
 
 #define Prefix @"YTABC"
+#define EnabledKey @"EnabledYTABC"
 #define INCLUDED_CLASSES @"Included classes: YTGlobalConfig, YTColdConfig, YTHotConfig"
 #define EXCLUDED_METHODS @"Excluded settings: android*, amsterdam*, musicClient* and unplugged*"
 
@@ -21,6 +24,10 @@ static const NSInteger YTABCSection = 404;
 
 NSMutableDictionary <NSString *, NSMutableDictionary <NSString *, NSNumber *> *> *cache;
 NSUserDefaults *defaults;
+
+static BOOL tweakEnabled() {
+    return [defaults boolForKey:EnabledKey];
+}
 
 static NSString *getKey(NSString *method, NSString *classKey) {
     return [NSString stringWithFormat:@"%@.%@.%@", Prefix, classKey, method];
@@ -55,6 +62,14 @@ static BOOL getValueFromInvocation(id target, SEL selector) {
     return result;
 }
 
+%hook YTSettingsSectionController
+
+- (void)setSelectedItem:(NSUInteger)selectedItem {
+    if (selectedItem != NSNotFound) %orig;
+}
+
+%end
+
 %hook YTAppSettingsPresentationData
 
 + (NSArray *)settingsCategoryOrder {
@@ -66,102 +81,152 @@ static BOOL getValueFromInvocation(id target, SEL selector) {
 
 %end
 
+static NSString *getCategory(char c, NSString *method) {
+    if (c == 'e') {
+        if ([method hasPrefix:@"elements"]) return @"elements";
+        if ([method hasPrefix:@"enable"]) return @"enable";
+    }
+    if (c == 'i') {
+        if ([method hasPrefix:@"ios"]) return @"ios";
+        if ([method hasPrefix:@"is"]) return @"is";
+    }
+    if (c == 's') {
+        if ([method hasPrefix:@"shorts"]) return @"shorts";
+        if ([method hasPrefix:@"should"]) return @"should";
+    }
+    return [NSString stringWithFormat:@"%c", c]; // FIXME: Yike -stringWithFormat:
+}
+
 %hook YTSettingsSectionItemManager
 
 %new(v@:@)
 - (void)updateYTABCSectionWithEntry:(id)entry {
     NSMutableArray *sectionItems = [NSMutableArray array];
-    for (NSString *classKey in cache) {
-        for (NSString *method in cache[classKey]) {
-            YTSettingsSectionItem *methodSwitch = [%c(YTSettingsSectionItem) switchItemWithTitle:method
-            titleDescription:nil
-            accessibilityIdentifier:nil
-            switchOn:getValue(getKey(method, classKey))
-            switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
-                setValue(method, classKey, enabled);
-                return YES;
-            }
-            // selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
-            //     YTAlertView *alertView = [%c(YTAlertView) infoDialog];
-            //     alertView.title = method;
-            //     alertView.subtitle = [NSString stringWithFormat:@"-[%@ %@]", classKey, method];
-            //     [alertView show];
-            //     return YES;
-            // }
-            settingItemId:0];
-            [sectionItems addObject:methodSwitch];
-        }
-    }
-    NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:@"title" ascending:YES];
-    [sectionItems sortUsingDescriptors:@[sort]];
-    YTSettingsSectionItem *copyAll = [%c(YTSettingsSectionItem)
-        itemWithTitle:@"Copy current settings"
-        titleDescription:@"Tap to copy the current settings to the clipboard."
-        accessibilityIdentifier:nil
-        detailTextBlock:nil
-        selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
-            UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
-            NSMutableArray *content = [NSMutableArray array];
-            for (NSString *classKey in cache) {
-                [cache[classKey] enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSNumber *value, BOOL* stop) {
-                    [content addObject:[NSString stringWithFormat:@"%@: %d", key, [value boolValue]]];
-                }];
-            }
-            [content sortUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
-            [content insertObject:[NSString stringWithFormat:@"Device model: %@", [%c(YTCommonUtils) hardwareModel]] atIndex:0];
-            [content insertObject:[NSString stringWithFormat:@"App version: %@", [%c(YTVersionUtils) appVersion]] atIndex:0];
-            [content insertObject:EXCLUDED_METHODS atIndex:0];
-            [content insertObject:INCLUDED_CLASSES atIndex:0];
-            [content insertObject:[NSString stringWithFormat:@"YTABConfig version: %@", @(OS_STRINGIFY(TWEAK_VERSION))] atIndex:0];
-            pasteboard.string = [content componentsJoinedByString:@"\n"];
-            return YES;
-        }];
-    [sectionItems insertObject:copyAll atIndex:0];
-    YTSettingsSectionItem *modified = [%c(YTSettingsSectionItem)
-        itemWithTitle:@"View modified settings"
-        titleDescription:@"Tap to view all the changes you made manually."
-        accessibilityIdentifier:nil
-        detailTextBlock:nil
-        selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
-            NSMutableArray *features = [NSMutableArray array];
-            for (NSString *key in [defaults dictionaryRepresentation].allKeys) {
-                if ([key hasPrefix:Prefix]) {
-                    NSString *displayKey = [key substringFromIndex:Prefix.length + 1];
-                    [features addObject:[NSString stringWithFormat:@"%@: %d", displayKey, [defaults boolForKey:key]]];
+    int totalSettings = 0;
+    if (tweakEnabled()) {
+        NSMutableDictionary <NSString *, NSMutableArray <YTSettingsSectionItem *> *> *properties = [NSMutableDictionary dictionary];
+        for (NSString *classKey in cache) {
+            for (NSString *method in cache[classKey]) {
+                char c = tolower([method characterAtIndex:0]);
+                NSString *category = getCategory(c, method);
+                if (![properties objectForKey:category]) properties[category] = [NSMutableArray array];
+                YTSettingsSectionItem *methodSwitch = [%c(YTSettingsSectionItem) switchItemWithTitle:method
+                titleDescription:nil
+                accessibilityIdentifier:nil
+                switchOn:getValue(getKey(method, classKey))
+                switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
+                    setValue(method, classKey, enabled);
+                    return YES;
                 }
+                // selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
+                //     YTAlertView *alertView = [%c(YTAlertView) infoDialog];
+                //     alertView.title = method;
+                //     alertView.subtitle = [NSString stringWithFormat:@"-[%@ %@]", classKey, method];
+                //     [alertView show];
+                //     return YES;
+                // }
+                settingItemId:0];
+                [properties[category] addObject:methodSwitch];
             }
-            [features sortUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
-            [features insertObject:[NSString stringWithFormat:@"Total: %ld", features.count] atIndex:0];
-            NSString *content = [features componentsJoinedByString:@"\n"];
-            YTAlertView *alertView = [%c(YTAlertView) confirmationDialogWithAction:^{
+        }
+        YTSettingsViewController *settingsViewController = [self valueForKey:@"_settingsViewControllerDelegate"];
+        for (NSString *category in properties) {
+            NSMutableArray *rows = properties[category];
+            totalSettings += rows.count;
+            NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:@"title" ascending:YES];
+            [rows sortUsingDescriptors:@[sort]];
+            NSString *title = [NSString stringWithFormat:@"Settings starting with \"%@\" (%ld)", category, rows.count];
+            YTSettingsSectionItem *sectionItem = [%c(YTSettingsSectionItem) itemWithTitle:title accessibilityIdentifier:nil detailTextBlock:nil selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
+                YTSettingsPickerViewController *picker = [[%c(YTSettingsPickerViewController) alloc] initWithNavTitle:title pickerSectionTitle:nil rows:rows selectedItemIndex:NSNotFound parentResponder:[self parentResponder]];
+                [settingsViewController pushViewController:picker];
+                return YES;
+            }];
+            [sectionItems addObject:sectionItem];
+        }
+        NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:@"title" ascending:YES];
+        [sectionItems sortUsingDescriptors:@[sort]];
+        YTSettingsSectionItem *copyAll = [%c(YTSettingsSectionItem)
+            itemWithTitle:@"Copy current settings"
+            titleDescription:@"Tap to copy the current settings to the clipboard."
+            accessibilityIdentifier:nil
+            detailTextBlock:nil
+            selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
                 UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
-                pasteboard.string = content;
-            } actionTitle:@"Copy to clipboard"];
-            alertView.title = @"Changes";
-            alertView.subtitle = content;
-            [alertView show];
-            return YES;
-        }];
-    [sectionItems insertObject:modified atIndex:0];
-    YTSettingsSectionItem *reset = [%c(YTSettingsSectionItem)
-        itemWithTitle:@"Reset and Kill"
-        titleDescription:@"Tap to undo all of your changes and kill the app."
+                NSMutableArray *content = [NSMutableArray array];
+                for (NSString *classKey in cache) {
+                    [cache[classKey] enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSNumber *value, BOOL* stop) {
+                        [content addObject:[NSString stringWithFormat:@"%@: %d", key, [value boolValue]]];
+                    }];
+                }
+                [content sortUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+                [content insertObject:[NSString stringWithFormat:@"Device model: %@", [%c(YTCommonUtils) hardwareModel]] atIndex:0];
+                [content insertObject:[NSString stringWithFormat:@"App version: %@", [%c(YTVersionUtils) appVersion]] atIndex:0];
+                [content insertObject:EXCLUDED_METHODS atIndex:0];
+                [content insertObject:INCLUDED_CLASSES atIndex:0];
+                [content insertObject:[NSString stringWithFormat:@"YTABConfig version: %@", @(OS_STRINGIFY(TWEAK_VERSION))] atIndex:0];
+                pasteboard.string = [content componentsJoinedByString:@"\n"];
+                [[%c(YTToastResponderEvent) eventWithMessage:@"Copied to clipboard." firstResponder:[self parentResponder]] send];
+                return YES;
+            }];
+        [sectionItems insertObject:copyAll atIndex:0];
+        YTSettingsSectionItem *modified = [%c(YTSettingsSectionItem)
+            itemWithTitle:@"View modified settings"
+            titleDescription:@"Tap to view all the changes you made manually."
+            accessibilityIdentifier:nil
+            detailTextBlock:nil
+            selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
+                NSMutableArray *features = [NSMutableArray array];
+                for (NSString *key in [defaults dictionaryRepresentation].allKeys) {
+                    if ([key hasPrefix:Prefix]) {
+                        NSString *displayKey = [key substringFromIndex:Prefix.length + 1];
+                        [features addObject:[NSString stringWithFormat:@"%@: %d", displayKey, [defaults boolForKey:key]]];
+                    }
+                }
+                [features sortUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+                [features insertObject:[NSString stringWithFormat:@"Total: %ld", features.count] atIndex:0];
+                NSString *content = [features componentsJoinedByString:@"\n"];
+                YTAlertView *alertView = [%c(YTAlertView) confirmationDialogWithAction:^{
+                    UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
+                    pasteboard.string = content;
+                } actionTitle:@"Copy to clipboard"];
+                alertView.title = @"Changes";
+                alertView.subtitle = content;
+                [alertView show];
+                return YES;
+            }];
+        [sectionItems insertObject:modified atIndex:0];
+        YTSettingsSectionItem *reset = [%c(YTSettingsSectionItem)
+            itemWithTitle:@"Reset and Kill"
+            titleDescription:@"Tap to undo all of your changes and kill the app."
+            accessibilityIdentifier:nil
+            detailTextBlock:nil
+            selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
+                for (NSString *key in [defaults dictionaryRepresentation].allKeys) {
+                    if ([key hasPrefix:Prefix])
+                        [defaults removeObjectForKey:key];
+                }
+                exit(0);
+            }];
+        [sectionItems insertObject:reset atIndex:0];
+    }
+    YTSettingsSectionItem *master = [%c(YTSettingsSectionItem)
+        switchItemWithTitle:@"Enabled"
+        titleDescription:@"Enable to show A/B settings."
         accessibilityIdentifier:nil
-        detailTextBlock:nil
-        selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
-            for (NSString *key in [defaults dictionaryRepresentation].allKeys) {
-                if ([key hasPrefix:Prefix])
-                    [defaults removeObjectForKey:key];
-            }
+        switchOn:tweakEnabled()
+        switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
+            [defaults setBool:enabled forKey:EnabledKey];
             exit(0);
-        }];
-    [sectionItems insertObject:reset atIndex:0];
+            return YES;
+        }
+        settingItemId:0];
+    [sectionItems insertObject:master atIndex:0];
     YTSettingsViewController *delegate = [self valueForKey:@"_dataDelegate"];
     [delegate
         setSectionItems:sectionItems
         forCategory:YTABCSection
         title:@"A/B"
-        titleDescription:[NSString stringWithFormat:@"Here is the list of %ld YouTube app features. Be absolutely sure of what you try to change here!", sectionItems.count]
+        titleDescription:tweakEnabled() ? [NSString stringWithFormat:@"YTABConfig %@, %d app features.", @(OS_STRINGIFY(TWEAK_VERSION)), totalSettings] : nil
         headerHidden:NO];
 }
 
@@ -209,12 +274,14 @@ static void hookClass(NSObject *instance, Class instanceClass) {
 
 - (BOOL)application:(id)arg1 didFinishLaunchingWithOptions:(id)arg2 {
     defaults = [NSUserDefaults standardUserDefaults];
-    YTGlobalConfig *globalConfig = [self valueForKey:@"_globalConfig"];
-    YTColdConfig *coldConfig = [self valueForKey:@"_coldConfig"];
-    YTHotConfig *hotConfig = [self valueForKey:@"_hotConfig"];
-    hookClass(globalConfig, [globalConfig class]);
-    hookClass(coldConfig, [coldConfig class]);
-    hookClass(hotConfig, [hotConfig class]);
+    if (tweakEnabled()) {
+        YTGlobalConfig *globalConfig = [self valueForKey:@"_globalConfig"];
+        YTColdConfig *coldConfig = [self valueForKey:@"_coldConfig"];
+        YTHotConfig *hotConfig = [self valueForKey:@"_hotConfig"];
+        hookClass(globalConfig, [globalConfig class]);
+        hookClass(coldConfig, [coldConfig class]);
+        hookClass(hotConfig, [hotConfig class]);
+    }
     return %orig;
 }
 
