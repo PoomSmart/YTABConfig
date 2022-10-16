@@ -1,6 +1,7 @@
 #import "../YouTubeHeader/YTAlertView.h"
 #import "../YouTubeHeader/YTAppDelegate.h"
 #import "../YouTubeHeader/YTCommonUtils.h"
+#import "../YouTubeHeader/YTUIUtils.h"
 #import "../YouTubeHeader/YTVersionUtils.h"
 #import "../YouTubeHeader/YTGlobalConfig.h"
 #import "../YouTubeHeader/YTColdConfig.h"
@@ -15,6 +16,8 @@
 #define EnabledKey @"EnabledYTABC"
 #define INCLUDED_CLASSES @"Included classes: YTGlobalConfig, YTColdConfig, YTHotConfig"
 #define EXCLUDED_METHODS @"Excluded settings: android*, amsterdam*, musicClient* and unplugged*"
+
+#define LOC(x) [tweakBundle localizedStringForKey:x value:nil table:nil]
 
 @interface YTSettingsSectionItemManager (YTABConfig)
 - (void)updateYTABCSectionWithEntry:(id)entry;
@@ -62,6 +65,22 @@ static BOOL getValueFromInvocation(id target, SEL selector) {
     return result;
 }
 
+NSBundle *YTABCBundle() {
+    static NSBundle *bundle = nil;
+    static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
+        NSString *tweakBundlePath = [[NSBundle mainBundle] pathForResource:@"YTABC" ofType:@"bundle"];
+        if (tweakBundlePath)
+            bundle = [NSBundle bundleWithPath:tweakBundlePath];
+        else {
+            bundle = [NSBundle bundleWithPath:@"/Library/Application Support/YTABC.bundle"];
+            if (!bundle)
+                bundle = [NSBundle bundleWithPath:@"/var/jb/Library/Application Support/YTABC.bundle"];
+        }
+    });
+    return bundle;
+}
+
 %hook YTSettingsSectionController
 
 - (void)setSelectedItem:(NSUInteger)selectedItem {
@@ -103,6 +122,7 @@ static NSString *getCategory(char c, NSString *method) {
 - (void)updateYTABCSectionWithEntry:(id)entry {
     NSMutableArray *sectionItems = [NSMutableArray array];
     int totalSettings = 0;
+    NSBundle *tweakBundle = YTABCBundle();
     if (tweakEnabled()) {
         NSMutableDictionary <NSString *, NSMutableArray <YTSettingsSectionItem *> *> *properties = [NSMutableDictionary dictionary];
         for (NSString *classKey in cache) {
@@ -135,7 +155,7 @@ static NSString *getCategory(char c, NSString *method) {
             totalSettings += rows.count;
             NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:@"title" ascending:YES];
             [rows sortUsingDescriptors:@[sort]];
-            NSString *title = [NSString stringWithFormat:@"Settings starting with \"%@\" (%ld)", category, rows.count];
+            NSString *title = [NSString stringWithFormat:@"%@ \"%@\" (%ld)", LOC(@"SETTINGS_START_WITH"), category, rows.count];
             YTSettingsSectionItem *sectionItem = [%c(YTSettingsSectionItem) itemWithTitle:title accessibilityIdentifier:nil detailTextBlock:nil selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
                 YTSettingsPickerViewController *picker = [[%c(YTSettingsPickerViewController) alloc] initWithNavTitle:title pickerSectionTitle:nil rows:rows selectedItemIndex:NSNotFound parentResponder:[self parentResponder]];
                 [settingsViewController pushViewController:picker];
@@ -146,8 +166,8 @@ static NSString *getCategory(char c, NSString *method) {
         NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:@"title" ascending:YES];
         [sectionItems sortUsingDescriptors:@[sort]];
         YTSettingsSectionItem *copyAll = [%c(YTSettingsSectionItem)
-            itemWithTitle:@"Copy current settings"
-            titleDescription:@"Tap to copy the current settings to the clipboard."
+            itemWithTitle:LOC(@"COPY_CURRENT_SETTINGS")
+            titleDescription:LOC(@"COPY_CURRENT_SETTINGS_DESC")
             accessibilityIdentifier:nil
             detailTextBlock:nil
             selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
@@ -165,13 +185,13 @@ static NSString *getCategory(char c, NSString *method) {
                 [content insertObject:INCLUDED_CLASSES atIndex:0];
                 [content insertObject:[NSString stringWithFormat:@"YTABConfig version: %@", @(OS_STRINGIFY(TWEAK_VERSION))] atIndex:0];
                 pasteboard.string = [content componentsJoinedByString:@"\n"];
-                [[%c(YTToastResponderEvent) eventWithMessage:@"Copied to clipboard." firstResponder:[self parentResponder]] send];
+                [[%c(YTToastResponderEvent) eventWithMessage:LOC(@"COPIED_TO_CLIPBOARD") firstResponder:[self parentResponder]] send];
                 return YES;
             }];
         [sectionItems insertObject:copyAll atIndex:0];
         YTSettingsSectionItem *modified = [%c(YTSettingsSectionItem)
-            itemWithTitle:@"View modified settings"
-            titleDescription:@"Tap to view all the changes you made manually."
+            itemWithTitle:LOC(@"VIEW_MODIFIED_SETTINGS")
+            titleDescription:LOC(@"VIEW_MODIFIED_SETTINGS_DESC")
             accessibilityIdentifier:nil
             detailTextBlock:nil
             selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
@@ -183,21 +203,21 @@ static NSString *getCategory(char c, NSString *method) {
                     }
                 }
                 [features sortUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
-                [features insertObject:[NSString stringWithFormat:@"Total: %ld", features.count] atIndex:0];
+                [features insertObject:[NSString stringWithFormat:LOC(@"TOTAL_MODIFIED_SETTINGS"), features.count] atIndex:0];
                 NSString *content = [features componentsJoinedByString:@"\n"];
                 YTAlertView *alertView = [%c(YTAlertView) confirmationDialogWithAction:^{
                     UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
                     pasteboard.string = content;
-                } actionTitle:@"Copy to clipboard"];
-                alertView.title = @"Changes";
+                } actionTitle:LOC(@"COPY_TO_CLIPBOARD")];
+                alertView.title = LOC(@"MODIFIED_SETTINGS_TITLE");
                 alertView.subtitle = content;
                 [alertView show];
                 return YES;
             }];
         [sectionItems insertObject:modified atIndex:0];
         YTSettingsSectionItem *reset = [%c(YTSettingsSectionItem)
-            itemWithTitle:@"Reset and Kill"
-            titleDescription:@"Tap to undo all of your changes and kill the app."
+            itemWithTitle:LOC(@"RESET_KILL")
+            titleDescription:LOC(@"RESET_KILL_DESC")
             accessibilityIdentifier:nil
             detailTextBlock:nil
             selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
@@ -209,9 +229,18 @@ static NSString *getCategory(char c, NSString *method) {
             }];
         [sectionItems insertObject:reset atIndex:0];
     }
+    YTSettingsSectionItem *thread = [%c(YTSettingsSectionItem)
+        itemWithTitle:LOC(@"OPEN_MEGATHREAD")
+        titleDescription:LOC(@"OPEN_MEGATHREAD_DESC")
+        accessibilityIdentifier:nil
+        detailTextBlock:nil
+        selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
+            return [%c(YTUIUtils) openURL:[NSURL URLWithString:@"https://github.com/PoomSmart/YTABConfig/discussions"]];
+        }];
+    [sectionItems insertObject:thread atIndex:0];
     YTSettingsSectionItem *master = [%c(YTSettingsSectionItem)
-        switchItemWithTitle:@"Enabled"
-        titleDescription:@"Enable to show A/B settings."
+        switchItemWithTitle:LOC(@"ENABLED")
+        titleDescription:LOC(@"ENABLED_DESC")
         accessibilityIdentifier:nil
         switchOn:tweakEnabled()
         switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
@@ -226,7 +255,7 @@ static NSString *getCategory(char c, NSString *method) {
         setSectionItems:sectionItems
         forCategory:YTABCSection
         title:@"A/B"
-        titleDescription:tweakEnabled() ? [NSString stringWithFormat:@"YTABConfig %@, %d app features.", @(OS_STRINGIFY(TWEAK_VERSION)), totalSettings] : nil
+        titleDescription:tweakEnabled() ? [NSString stringWithFormat:@"YTABConfig %@, %d feature flags.", @(OS_STRINGIFY(TWEAK_VERSION)), totalSettings] : nil
         headerHidden:NO];
 }
 
