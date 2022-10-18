@@ -1,6 +1,7 @@
 // Settings
 "ENABLED" = "مفعَّل";
 "ENABLED_DESC" = "فعَل لإظهار إعدادات A/B.";
+"GROUPED" = "الإعدادات مجمَّعة حسب البادئات";
 "RESET_KILL" = "إعادة التعيين والخروج من التطبيق";
 "RESET_KILL_DESC" = "المس هنا للتراجع عن كل تغييراتك والخروج من التطبيق.";
 "COPY_CURRENT_SETTINGS" = "نسخ الإعدادات الحالية";
@@ -14,7 +15,7 @@
 
 "OPEN_MEGATHREAD" = "فتح موضوع المناقشات";
 "OPEN_MEGATHREAD_DESC" = "فتح موضوع YTABConfig على موقع GitHub حيث يمكنك مشاركة ومناقشة تأثير تفعيل وإلغاء كل خيار.";
-"SETTINGS_START_WITH" = "الخيارات التي تبدأ بـ";
+"SETTINGS_START_WITH" = "الإعدادات التي تبدأ بـ";
 
 // Clipboard
 
