@@ -1,7 +1,7 @@
 // Settings
 "ENABLED" = "Kích hoạt";
-"ENABLED_DESC" = "Kích hoạt tinh chỉnh để hiện các thử nghiệm A/B (flag).";
-"GROUPED" = "Grouped settings by prefixes";
+"ENABLED_DESC" = "Kích hoạt tinh chỉnh để hiện cài đặt của các thử nghiệm A/B (flag).";
+"GROUPED" = "Gộp các cài đặt lại theo vần";
 "RESET_KILL" = "Khôi phục các thay đổi";
 "RESET_KILL_DESC" = "Chạm để khôi phục các thay đổi và đóng ứng dụng.";
 "COPY_CURRENT_SETTINGS" = "Sao chép các thay đổi";
