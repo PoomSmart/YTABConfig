@@ -10,10 +10,12 @@
 #import "../YouTubeHeader/YTSettingsSectionItemManager.h"
 #import "../YouTubeHeader/YTSettingsPickerViewController.h"
 #import "../YouTubeHeader/YTSettingsViewController.h"
+#import "../YouTubeHeader/YTSearchableSettingsViewController.h"
 #import "../YouTubeHeader/YTToastResponderEvent.h"
 
 #define Prefix @"YTABC"
 #define EnabledKey @"EnabledYTABC"
+#define GroupedKey @"GroupedYTABC"
 #define INCLUDED_CLASSES @"Included classes: YTGlobalConfig, YTColdConfig, YTHotConfig"
 #define EXCLUDED_METHODS @"Excluded settings: android*, amsterdam*, musicClient* and unplugged*"
 
@@ -30,6 +32,10 @@ NSUserDefaults *defaults;
 
 static BOOL tweakEnabled() {
     return [defaults boolForKey:EnabledKey];
+}
+
+static BOOL groupedSettings() {
+    return [defaults boolForKey:GroupedKey];
 }
 
 static NSString *getKey(NSString *method, NSString *classKey) {
@@ -85,6 +91,26 @@ NSBundle *YTABCBundle() {
 
 - (void)setSelectedItem:(NSUInteger)selectedItem {
     if (selectedItem != NSNotFound) %orig;
+}
+
+%end
+
+%hook YTSettingsViewController
+
+- (void)loadWithModel:(id)model fromView:(UIView *)view {
+    %orig;
+    if ([[self valueForKey:@"_detailsCategoryID"] integerValue] == YTABCSection)
+        MSHookIvar<BOOL>(self, "_shouldShowSearchBar") = YES;
+}
+
+- (void)setSectionControllers {
+    %orig;
+    if (MSHookIvar<BOOL>(self, "_shouldShowSearchBar")) {
+        YTSettingsSectionController *settingsSectionController = [self settingsSectionControllers][[self valueForKey:@"_detailsCategoryID"]];
+        YTSearchableSettingsViewController *searchableVC = [self valueForKey:@"_searchableSettingsViewController"];
+        if (settingsSectionController)
+            [searchableVC storeCollectionViewSections:@[settingsSectionController]];
+    }
 }
 
 %end
@@ -150,18 +176,23 @@ static NSString *getCategory(char c, NSString *method) {
             }
         }
         YTSettingsViewController *settingsViewController = [self valueForKey:@"_settingsViewControllerDelegate"];
+        BOOL grouped = groupedSettings();
         for (NSString *category in properties) {
             NSMutableArray *rows = properties[category];
             totalSettings += rows.count;
-            NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:@"title" ascending:YES];
-            [rows sortUsingDescriptors:@[sort]];
-            NSString *title = [NSString stringWithFormat:@"%@ \"%@\" (%ld)", LOC(@"SETTINGS_START_WITH"), category, rows.count];
-            YTSettingsSectionItem *sectionItem = [%c(YTSettingsSectionItem) itemWithTitle:title accessibilityIdentifier:nil detailTextBlock:nil selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
-                YTSettingsPickerViewController *picker = [[%c(YTSettingsPickerViewController) alloc] initWithNavTitle:title pickerSectionTitle:nil rows:rows selectedItemIndex:NSNotFound parentResponder:[self parentResponder]];
-                [settingsViewController pushViewController:picker];
-                return YES;
-            }];
-            [sectionItems addObject:sectionItem];
+            if (grouped) {
+                NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:@"title" ascending:YES];
+                [rows sortUsingDescriptors:@[sort]];
+                NSString *title = [NSString stringWithFormat:@"%@ \"%@\" (%ld)", LOC(@"SETTINGS_START_WITH"), category, rows.count];
+                YTSettingsSectionItem *sectionItem = [%c(YTSettingsSectionItem) itemWithTitle:title accessibilityIdentifier:nil detailTextBlock:nil selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
+                    YTSettingsPickerViewController *picker = [[%c(YTSettingsPickerViewController) alloc] initWithNavTitle:title pickerSectionTitle:nil rows:rows selectedItemIndex:NSNotFound parentResponder:[self parentResponder]];
+                    [settingsViewController pushViewController:picker];
+                    return YES;
+                }];
+                [sectionItems addObject:sectionItem];
+            } else {
+                [sectionItems addObjectsFromArray:rows];
+            }
         }
         NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:@"title" ascending:YES];
         [sectionItems sortUsingDescriptors:@[sort]];
@@ -228,6 +259,18 @@ static NSString *getCategory(char c, NSString *method) {
                 exit(0);
             }];
         [sectionItems insertObject:reset atIndex:0];
+        YTSettingsSectionItem *group = [%c(YTSettingsSectionItem)
+            switchItemWithTitle:LOC(@"GROUPED")
+            titleDescription:nil
+            accessibilityIdentifier:nil
+            switchOn:groupedSettings()
+            switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
+                [defaults setBool:enabled forKey:GroupedKey];
+                exit(0);
+                return YES;
+            }
+            settingItemId:0];
+        [sectionItems insertObject:group atIndex:0];
     }
     YTSettingsSectionItem *thread = [%c(YTSettingsSectionItem)
         itemWithTitle:LOC(@"OPEN_MEGATHREAD")

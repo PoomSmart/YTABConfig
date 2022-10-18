@@ -1,6 +1,7 @@
 // Settings
 "ENABLED" = "Enabled";
 "ENABLED_DESC" = "Enable to show A/B settings.";
+"GROUPED" = "Grouped settings by prefixes";
 "RESET_KILL" = "Reset and Kill";
 "RESET_KILL_DESC" = "Tap to undo all of your changes and kill the app.";
 "COPY_CURRENT_SETTINGS" = "Copy current settings";
