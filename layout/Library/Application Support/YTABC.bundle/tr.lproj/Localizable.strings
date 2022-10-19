@@ -1,0 +1,26 @@
+// Settings
+"ENABLED" = "Etkinleştir";
+"ENABLED_DESC" = "A/B ayarlarını göstermeyi etkinleştirir.";
+"GROUPED" = "Öneklere göre gruplandırılmış ayarlar";
+"RESET_KILL" = "Sıfırla ve Kapat";
+"RESET_KILL_DESC" = "Tüm değişikliklerinizi geri almak ve uygulamayı kapatmak için dokunun.";
+"COPY_CURRENT_SETTINGS" = "Mevcut ayarları kopyalayın.";
+"COPY_CURRENT_SETTINGS_DESC" = "Mevcut ayarları panoya kopyalamak için dokunun.";
+"VIEW_MODIFIED_SETTINGS" = "Değiştirilen ayarları görüntüle";
+"VIEW_MODIFIED_SETTINGS_DESC" = "El ile yaptığınız tüm değişiklikleri görüntülemek için dokunun.";
+
+// Shown in alert
+"MODIFIED_SETTINGS_TITLE" = "Değişiklikler";
+"TOTAL_MODIFIED_SETTINGS" = "Toplam: %ld";
+
+"OPEN_MEGATHREAD" = "Open megathread";
+"OPEN_MEGATHREAD_DESC" = "Etkinleştirilen veya devre dışı bırakılan her ayarın etkisini paylaşabileceğiniz ve tartışabileceğiniz YTABConfig megabaşlığını(megathread) GitHub'da açar.";
+"SETTINGS_START_WITH" = "Yazılan ile başlayan ayarlar";
+
+// Clipboard
+
+// Shown in alert
+"COPY_TO_CLIPBOARD" = "Panoya kopyala";
+
+// Shown in toast
+"COPIED_TO_CLIPBOARD" = "Panoya kopyalandı.";
