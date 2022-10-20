@@ -239,6 +239,7 @@ static NSString *getCategory(char c, NSString *method) {
                 YTAlertView *alertView = [%c(YTAlertView) confirmationDialogWithAction:^{
                     UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
                     pasteboard.string = content;
+                    [[%c(YTToastResponderEvent) eventWithMessage:LOC(@"COPIED_TO_CLIPBOARD") firstResponder:[self parentResponder]] send];
                 } actionTitle:LOC(@"COPY_TO_CLIPBOARD")];
                 alertView.title = LOC(@"MODIFIED_SETTINGS_TITLE");
                 alertView.subtitle = content;
