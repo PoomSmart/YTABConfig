@@ -107,9 +107,10 @@ NSBundle *YTABCBundle() {
     %orig;
     if (MSHookIvar<BOOL>(self, "_shouldShowSearchBar")) {
         YTSettingsSectionController *settingsSectionController = [self settingsSectionControllers][[self valueForKey:@"_detailsCategoryID"]];
-        YTSearchableSettingsViewController *searchableVC = [self valueForKey:@"_searchableSettingsViewController"];
-        if (settingsSectionController)
+        if (settingsSectionController) {
+            YTSearchableSettingsViewController *searchableVC = [self valueForKey:@"_searchableSettingsViewController"];
             [searchableVC storeCollectionViewSections:@[settingsSectionController]];
+        }
     }
 }
 
@@ -149,6 +150,7 @@ static NSString *getCategory(char c, NSString *method) {
     NSMutableArray *sectionItems = [NSMutableArray array];
     int totalSettings = 0;
     NSBundle *tweakBundle = YTABCBundle();
+    BOOL isPhone = ![%c(YTCommonUtils) isIPad];
     if (tweakEnabled()) {
         NSMutableDictionary <NSString *, NSMutableArray <YTSettingsSectionItem *> *> *properties = [NSMutableDictionary dictionary];
         for (NSString *classKey in cache) {
@@ -157,7 +159,7 @@ static NSString *getCategory(char c, NSString *method) {
                 NSString *category = getCategory(c, method);
                 if (![properties objectForKey:category]) properties[category] = [NSMutableArray array];
                 YTSettingsSectionItem *methodSwitch = [%c(YTSettingsSectionItem) switchItemWithTitle:method
-                titleDescription:nil
+                titleDescription:isPhone && method.length > 26 ? method : nil
                 accessibilityIdentifier:nil
                 switchOn:getValue(getKey(method, classKey))
                 switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
@@ -183,9 +185,10 @@ static NSString *getCategory(char c, NSString *method) {
             if (grouped) {
                 NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:@"title" ascending:YES];
                 [rows sortUsingDescriptors:@[sort]];
-                NSString *title = [NSString stringWithFormat:@"%@ \"%@\" (%ld)", LOC(@"SETTINGS_START_WITH"), category, rows.count];
+                NSString *shortTitle = [NSString stringWithFormat:@"\"%@\" (%ld)", category, rows.count];
+                NSString *title = [NSString stringWithFormat:@"%@ %@", LOC(@"SETTINGS_START_WITH"), shortTitle];
                 YTSettingsSectionItem *sectionItem = [%c(YTSettingsSectionItem) itemWithTitle:title accessibilityIdentifier:nil detailTextBlock:nil selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
-                    YTSettingsPickerViewController *picker = [[%c(YTSettingsPickerViewController) alloc] initWithNavTitle:title pickerSectionTitle:nil rows:rows selectedItemIndex:NSNotFound parentResponder:[self parentResponder]];
+                    YTSettingsPickerViewController *picker = [[%c(YTSettingsPickerViewController) alloc] initWithNavTitle:shortTitle pickerSectionTitle:nil rows:rows selectedItemIndex:NSNotFound parentResponder:[self parentResponder]];
                     [settingsViewController pushViewController:picker];
                     return YES;
                 }];
@@ -239,6 +242,7 @@ static NSString *getCategory(char c, NSString *method) {
                 YTAlertView *alertView = [%c(YTAlertView) confirmationDialogWithAction:^{
                     UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
                     pasteboard.string = content;
+                    [[%c(YTToastResponderEvent) eventWithMessage:LOC(@"COPIED_TO_CLIPBOARD") firstResponder:[self parentResponder]] send];
                 } actionTitle:LOC(@"COPY_TO_CLIPBOARD")];
                 alertView.title = LOC(@"MODIFIED_SETTINGS_TITLE");
                 alertView.subtitle = content;
@@ -330,7 +334,8 @@ static NSMutableArray <NSString *> *getBooleanMethods(Class clz) {
     return allMethods;
 }
 
-static void hookClass(NSObject *instance, Class instanceClass) {
+static void hookClass(NSObject *instance) {
+    Class instanceClass = [instance class];
     NSMutableArray <NSString *> *methods = getBooleanMethods(instanceClass);
     NSString *classKey = NSStringFromClass(instanceClass);
     NSMutableDictionary *classCache = cache[classKey] = [NSMutableDictionary new];
@@ -350,9 +355,9 @@ static void hookClass(NSObject *instance, Class instanceClass) {
         YTGlobalConfig *globalConfig = [self valueForKey:@"_globalConfig"];
         YTColdConfig *coldConfig = [self valueForKey:@"_coldConfig"];
         YTHotConfig *hotConfig = [self valueForKey:@"_hotConfig"];
-        hookClass(globalConfig, [globalConfig class]);
-        hookClass(coldConfig, [coldConfig class]);
-        hookClass(hotConfig, [hotConfig class]);
+        hookClass(globalConfig);
+        hookClass(coldConfig);
+        hookClass(hotConfig);
     }
     return %orig;
 }
