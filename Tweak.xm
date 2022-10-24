@@ -150,6 +150,7 @@ static NSString *getCategory(char c, NSString *method) {
     NSMutableArray *sectionItems = [NSMutableArray array];
     int totalSettings = 0;
     NSBundle *tweakBundle = YTABCBundle();
+    BOOL isPhone = ![%c(YTCommonUtils) isIPad];
     if (tweakEnabled()) {
         NSMutableDictionary <NSString *, NSMutableArray <YTSettingsSectionItem *> *> *properties = [NSMutableDictionary dictionary];
         for (NSString *classKey in cache) {
@@ -158,7 +159,7 @@ static NSString *getCategory(char c, NSString *method) {
                 NSString *category = getCategory(c, method);
                 if (![properties objectForKey:category]) properties[category] = [NSMutableArray array];
                 YTSettingsSectionItem *methodSwitch = [%c(YTSettingsSectionItem) switchItemWithTitle:method
-                titleDescription:nil
+                titleDescription:isPhone && method.length > 26 ? method : nil
                 accessibilityIdentifier:nil
                 switchOn:getValue(getKey(method, classKey))
                 switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
@@ -184,9 +185,10 @@ static NSString *getCategory(char c, NSString *method) {
             if (grouped) {
                 NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:@"title" ascending:YES];
                 [rows sortUsingDescriptors:@[sort]];
-                NSString *title = [NSString stringWithFormat:@"%@ \"%@\" (%ld)", LOC(@"SETTINGS_START_WITH"), category, rows.count];
+                NSString *shortTitle = [NSString stringWithFormat:@"\"%@\" (%ld)", category, rows.count];
+                NSString *title = [NSString stringWithFormat:@"%@ %@", LOC(@"SETTINGS_START_WITH"), shortTitle];
                 YTSettingsSectionItem *sectionItem = [%c(YTSettingsSectionItem) itemWithTitle:title accessibilityIdentifier:nil detailTextBlock:nil selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
-                    YTSettingsPickerViewController *picker = [[%c(YTSettingsPickerViewController) alloc] initWithNavTitle:title pickerSectionTitle:nil rows:rows selectedItemIndex:NSNotFound parentResponder:[self parentResponder]];
+                    YTSettingsPickerViewController *picker = [[%c(YTSettingsPickerViewController) alloc] initWithNavTitle:shortTitle pickerSectionTitle:nil rows:rows selectedItemIndex:NSNotFound parentResponder:[self parentResponder]];
                     [settingsViewController pushViewController:picker];
                     return YES;
                 }];
