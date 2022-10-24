@@ -107,9 +107,10 @@ NSBundle *YTABCBundle() {
     %orig;
     if (MSHookIvar<BOOL>(self, "_shouldShowSearchBar")) {
         YTSettingsSectionController *settingsSectionController = [self settingsSectionControllers][[self valueForKey:@"_detailsCategoryID"]];
-        YTSearchableSettingsViewController *searchableVC = [self valueForKey:@"_searchableSettingsViewController"];
-        if (settingsSectionController)
+        if (settingsSectionController) {
+            YTSearchableSettingsViewController *searchableVC = [self valueForKey:@"_searchableSettingsViewController"];
             [searchableVC storeCollectionViewSections:@[settingsSectionController]];
+        }
     }
 }
 
@@ -331,7 +332,8 @@ static NSMutableArray <NSString *> *getBooleanMethods(Class clz) {
     return allMethods;
 }
 
-static void hookClass(NSObject *instance, Class instanceClass) {
+static void hookClass(NSObject *instance) {
+    Class instanceClass = [instance class];
     NSMutableArray <NSString *> *methods = getBooleanMethods(instanceClass);
     NSString *classKey = NSStringFromClass(instanceClass);
     NSMutableDictionary *classCache = cache[classKey] = [NSMutableDictionary new];
@@ -351,9 +353,9 @@ static void hookClass(NSObject *instance, Class instanceClass) {
         YTGlobalConfig *globalConfig = [self valueForKey:@"_globalConfig"];
         YTColdConfig *coldConfig = [self valueForKey:@"_coldConfig"];
         YTHotConfig *hotConfig = [self valueForKey:@"_hotConfig"];
-        hookClass(globalConfig, [globalConfig class]);
-        hookClass(coldConfig, [coldConfig class]);
-        hookClass(hotConfig, [hotConfig class]);
+        hookClass(globalConfig);
+        hookClass(coldConfig);
+        hookClass(hotConfig);
     }
     return %orig;
 }
