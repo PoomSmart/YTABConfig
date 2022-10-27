@@ -29,6 +29,7 @@ static const NSInteger YTABCSection = 404;
 
 NSMutableDictionary <NSString *, NSMutableDictionary <NSString *, NSNumber *> *> *cache;
 NSUserDefaults *defaults;
+NSArray <NSString *> *allKeys;
 
 static BOOL tweakEnabled() {
     return [defaults boolForKey:EnabledKey];
@@ -47,7 +48,7 @@ static NSString *getCacheKey(NSString *method, NSString *classKey) {
 }
 
 static BOOL getValue(NSString *methodKey) {
-    if ([defaults objectForKey:methodKey] == nil)
+    if (![allKeys containsObject:methodKey])
         return [[cache valueForKeyPath:[methodKey substringFromIndex:Prefix.length + 1]] boolValue];
     return [defaults boolForKey:methodKey];
 }
@@ -351,6 +352,7 @@ static void hookClass(NSObject *instance) {
 
 - (BOOL)application:(id)arg1 didFinishLaunchingWithOptions:(id)arg2 {
     defaults = [NSUserDefaults standardUserDefaults];
+    allKeys = [defaults dictionaryRepresentation].allKeys;
     if (tweakEnabled()) {
         YTGlobalConfig *globalConfig = [self valueForKey:@"_globalConfig"];
         YTColdConfig *coldConfig = [self valueForKey:@"_coldConfig"];
