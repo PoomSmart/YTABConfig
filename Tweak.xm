@@ -261,7 +261,13 @@ static NSString *getCategory(char c, NSString *method) {
                     if ([key hasPrefix:Prefix])
                         [defaults removeObjectForKey:key];
                 }
-                exit(0);
+                YTAlertView *alertView = [%c(YTAlertView) confirmationDialogWithAction:^{
+                    exit(0);
+                } actionTitle:LOC(@"APPLY")];
+                alertView.title = LOC(@"WARNING");
+                alertView.subtitle = LOC(@"APPLY_DESC");
+                [alertView show];
+                return YES;
             }];
         [sectionItems insertObject:reset atIndex:0];
         YTSettingsSectionItem *group = [%c(YTSettingsSectionItem)
@@ -271,7 +277,12 @@ static NSString *getCategory(char c, NSString *method) {
             switchOn:groupedSettings()
             switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
                 [defaults setBool:enabled forKey:GroupedKey];
-                exit(0);
+                YTAlertView *alertView = [%c(YTAlertView) confirmationDialogWithAction:^{
+                    exit(0);
+                } actionTitle:LOC(@"APPLY")];
+                alertView.title = LOC(@"WARNING");
+                alertView.subtitle = LOC(@"APPLY_DESC");
+                [alertView show];
                 return YES;
             }
             settingItemId:0];
@@ -293,7 +304,12 @@ static NSString *getCategory(char c, NSString *method) {
         switchOn:tweakEnabled()
         switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
             [defaults setBool:enabled forKey:EnabledKey];
-            exit(0);
+            YTAlertView *alertView = [%c(YTAlertView) confirmationDialogWithAction:^{
+                exit(0);
+            } actionTitle:LOC(@"APPLY")];
+            alertView.title = LOC(@"WARNING");
+            alertView.subtitle = LOC(@"APPLY_DESC");
+            [alertView show];
             return YES;
         }
         settingItemId:0];
