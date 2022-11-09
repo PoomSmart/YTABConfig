@@ -19,7 +19,8 @@
 #define INCLUDED_CLASSES @"Included classes: YTGlobalConfig, YTColdConfig, YTHotConfig"
 #define EXCLUDED_METHODS @"Excluded settings: android*, amsterdam*, musicClient* and unplugged*"
 
-#define LOC(x) [tweakBundle localizedStringForKey:x value:nil table:nil]
+#define _LOC(b, x) [b localizedStringForKey:x value:nil table:nil]
+#define LOC(x) _LOC(tweakBundle, x)
 
 @interface YTSettingsSectionItemManager (YTABConfig)
 - (void)updateYTABCSectionWithEntry:(id)entry;
@@ -152,6 +153,8 @@ static NSString *getCategory(char c, NSString *method) {
     int totalSettings = 0;
     NSBundle *tweakBundle = YTABCBundle();
     BOOL isPhone = ![%c(YTCommonUtils) isIPad];
+    NSString *yesText = _LOC([NSBundle mainBundle], @"settings.yes");
+    NSString *cancelText = _LOC([NSBundle mainBundle], @"confirm.cancel");
     if (tweakEnabled()) {
         NSMutableDictionary <NSString *, NSMutableArray <YTSettingsSectionItem *> *> *properties = [NSMutableDictionary dictionary];
         for (NSString *classKey in cache) {
@@ -257,13 +260,13 @@ static NSString *getCategory(char c, NSString *method) {
             accessibilityIdentifier:nil
             detailTextBlock:nil
             selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
-                for (NSString *key in [defaults dictionaryRepresentation].allKeys) {
-                    if ([key hasPrefix:Prefix])
-                        [defaults removeObjectForKey:key];
-                }
                 YTAlertView *alertView = [%c(YTAlertView) confirmationDialogWithAction:^{
+                    for (NSString *key in [defaults dictionaryRepresentation].allKeys) {
+                        if ([key hasPrefix:Prefix])
+                            [defaults removeObjectForKey:key];
+                    }
                     exit(0);
-                } actionTitle:LOC(@"APPLY")];
+                } actionTitle:yesText];
                 alertView.title = LOC(@"WARNING");
                 alertView.subtitle = LOC(@"APPLY_DESC");
                 [alertView show];
@@ -276,10 +279,16 @@ static NSString *getCategory(char c, NSString *method) {
             accessibilityIdentifier:nil
             switchOn:groupedSettings()
             switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
-                [defaults setBool:enabled forKey:GroupedKey];
-                YTAlertView *alertView = [%c(YTAlertView) confirmationDialogWithAction:^{
-                    exit(0);
-                } actionTitle:LOC(@"APPLY")];
+                YTAlertView *alertView = [%c(YTAlertView)
+                    confirmationDialogWithAction:^{
+                        [defaults setBool:enabled forKey:GroupedKey];
+                        exit(0);
+                    }
+                    actionTitle:yesText
+                    cancelAction:^{
+                        [cell setSwitchOn:!enabled animated:YES];
+                    }
+                    cancelTitle:cancelText];
                 alertView.title = LOC(@"WARNING");
                 alertView.subtitle = LOC(@"APPLY_DESC");
                 [alertView show];
@@ -304,9 +313,14 @@ static NSString *getCategory(char c, NSString *method) {
         switchOn:tweakEnabled()
         switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
             [defaults setBool:enabled forKey:EnabledKey];
-            YTAlertView *alertView = [%c(YTAlertView) confirmationDialogWithAction:^{
-                exit(0);
-            } actionTitle:LOC(@"APPLY")];
+            YTAlertView *alertView = [%c(YTAlertView)
+                confirmationDialogWithAction:^{
+                    exit(0);
+                } actionTitle:yesText
+                cancelAction:^{
+                    [cell setSwitchOn:!enabled animated:YES];
+                }
+                cancelTitle:cancelText];
             alertView.title = LOC(@"WARNING");
             alertView.subtitle = LOC(@"APPLY_DESC");
             [alertView show];

@@ -13,6 +13,10 @@
 "MODIFIED_SETTINGS_TITLE" = "التغييرات";
 "TOTAL_MODIFIED_SETTINGS" = "المجموع: %ld";
 
+// Quit app alert
+"WARNING" = "Warning";
+"APPLY_DESC" = "This action will quit YouTube. Are you sure you want to continue?";
+
 "OPEN_MEGATHREAD" = "فتح موضوع المناقشات";
 "OPEN_MEGATHREAD_DESC" = "فتح موضوع YTABConfig على موقع GitHub حيث يمكنك مشاركة ومناقشة تأثير تفعيل وإلغاء كل خيار.";
 "SETTINGS_START_WITH" = "الإعدادات التي تبدأ بـ";

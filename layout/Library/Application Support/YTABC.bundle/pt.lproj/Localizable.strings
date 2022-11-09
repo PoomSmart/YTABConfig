@@ -13,6 +13,10 @@
 "MODIFIED_SETTINGS_TITLE" = "Mudanças";
 "TOTAL_MODIFIED_SETTINGS" = "Total: %ld";
 
+// Quit app alert
+"WARNING" = "Warning";
+"APPLY_DESC" = "This action will quit YouTube. Are you sure you want to continue?";
+
 "OPEN_MEGATHREAD" = "Abrir discussão";
 "OPEN_MEGATHREAD_DESC" = "Abre a discussão do YTABConfig no GitHub, onde você pode compartilhar e discutir o efeito de cada sinalizador(flag) sendo habilitado ou desabilitado.";
 "SETTINGS_START_WITH" = "Configurações começando com";

@@ -13,10 +13,9 @@
 "MODIFIED_SETTINGS_TITLE" = "Настройки";
 "TOTAL_MODIFIED_SETTINGS" = "Всего: %ld";
 
-// Apply changes alert
+// Quit app alert
 "WARNING" = "Внимание";
-"APPLY_DESC" = "Приложение будет закрыто для применения настроек";
-"APPLY" = "Применить";
+"APPLY_DESC" = "This action will quit YouTube. Are you sure you want to continue?";
 
 "OPEN_MEGATHREAD" = "Дискуссии и рекомендации";
 "OPEN_MEGATHREAD_DESC" = "Перенаправит вас на страницу дискуссий и рекомендаций по YTABConfig на GitHub, где вы можете обсудить настройки и поделиться своим опытом о настройках твика.";

@@ -13,6 +13,10 @@
 "MODIFIED_SETTINGS_TITLE" = "已變更的";
 "TOTAL_MODIFIED_SETTINGS" = "總共: %ld";
 
+// Quit app alert
+"WARNING" = "Warning";
+"APPLY_DESC" = "This action will quit YouTube. Are you sure you want to continue?";
+
 "OPEN_MEGATHREAD" = "打開討論區";
 "OPEN_MEGATHREAD_DESC" = "打開YTABConfig在GitHub上的討論區，您可以在此討論或分享每項設定的作用。";
 "SETTINGS_START_WITH" = "以下列前綴開頭的設定";
