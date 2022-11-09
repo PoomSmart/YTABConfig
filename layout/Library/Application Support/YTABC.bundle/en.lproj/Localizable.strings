@@ -13,6 +13,11 @@
 "MODIFIED_SETTINGS_TITLE" = "Changes";
 "TOTAL_MODIFIED_SETTINGS" = "Total: %ld";
 
+// Apply changes alert
+"WARNING" = "Warning";
+"APPLY_DESC" = "App will be closed to apply the changes";
+"APPLY" = "Apply";
+
 "OPEN_MEGATHREAD" = "Open megathread";
 "OPEN_MEGATHREAD_DESC" = "Open YTABConfig megathread on GitHub where you can share and discuss the effect of each flag being enabled or disabled.";
 "SETTINGS_START_WITH" = "Settings starting with";
