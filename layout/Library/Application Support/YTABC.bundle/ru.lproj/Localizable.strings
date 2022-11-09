@@ -15,7 +15,7 @@
 
 // Quit app alert
 "WARNING" = "Внимание";
-"APPLY_DESC" = "This action will quit YouTube. Are you sure you want to continue?";
+"APPLY_DESC" = "Данное действие приведет к принудительному закрытию YouTube. Продолжить?";
 
 "OPEN_MEGATHREAD" = "Дискуссии и рекомендации";
 "OPEN_MEGATHREAD_DESC" = "Перенаправит вас на страницу дискуссий и рекомендаций по YTABConfig на GitHub, где вы можете обсудить настройки и поделиться своим опытом о настройках твика.";
