@@ -14,8 +14,8 @@
 "TOTAL_MODIFIED_SETTINGS" = "Toplam: %ld";
 
 // Quit app alert
-"WARNING" = "Warning";
-"APPLY_DESC" = "This action will quit YouTube. Are you sure you want to continue?";
+"WARNING" = "Uyarı";
+"APPLY_DESC" = "Bu eylem YouTube'u kapatacak. Devam etmek istediğine emin misin?";
 
 "OPEN_MEGATHREAD" = "Open megathread";
 "OPEN_MEGATHREAD_DESC" = "Etkinleştirilen veya devre dışı bırakılan her ayarın etkisini paylaşabileceğiniz ve tartışabileceğiniz YTABConfig megabaşlığını(megathread) GitHub'da açar.";
