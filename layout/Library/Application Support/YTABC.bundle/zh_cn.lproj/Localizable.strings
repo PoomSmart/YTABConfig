@@ -2,7 +2,7 @@
 "ENABLED" = "启用";
 "ENABLED_DESC" = "显示A/B测试选项。";
 "GROUPED" = "按首字母或前缀分组";
-"RESET_KILL" = "重置默认并退出";
+"RESET_KILL" = "恢复默认并退出";
 "RESET_KILL_DESC" = "将所有选项重置为默认值并关闭App。";
 "COPY_CURRENT_SETTINGS" = "复制当前设置";
 "COPY_CURRENT_SETTINGS_DESC" = "将当前设置复制到剪贴板。";
