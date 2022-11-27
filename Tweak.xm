@@ -89,13 +89,7 @@ NSBundle *YTABCBundle() {
     return bundle;
 }
 
-%hook YTSettingsSectionController
-
-- (void)setSelectedItem:(NSUInteger)selectedItem {
-    if (selectedItem != NSNotFound) %orig;
-}
-
-%end
+%group Search
 
 %hook YTSettingsViewController
 
@@ -114,6 +108,16 @@ NSBundle *YTABCBundle() {
             [searchableVC storeCollectionViewSections:@[settingsSectionController]];
         }
     }
+}
+
+%end
+
+%end
+
+%hook YTSettingsSectionController
+
+- (void)setSelectedItem:(NSUInteger)selectedItem {
+    if (selectedItem != NSNotFound) %orig;
 }
 
 %end
@@ -155,6 +159,8 @@ static NSString *getCategory(char c, NSString *method) {
     BOOL isPhone = ![%c(YTCommonUtils) isIPad];
     NSString *yesText = _LOC([NSBundle mainBundle], @"settings.yes");
     NSString *cancelText = _LOC([NSBundle mainBundle], @"confirm.cancel");
+    Class YTSettingsSectionItemClass = %c(YTSettingsSectionItem);
+    Class YTAlertViewClass = %c(YTAlertView);
     if (tweakEnabled()) {
         NSMutableDictionary <NSString *, NSMutableArray <YTSettingsSectionItem *> *> *properties = [NSMutableDictionary dictionary];
         for (NSString *classKey in cache) {
@@ -162,22 +168,24 @@ static NSString *getCategory(char c, NSString *method) {
                 char c = tolower([method characterAtIndex:0]);
                 NSString *category = getCategory(c, method);
                 if (![properties objectForKey:category]) properties[category] = [NSMutableArray array];
-                YTSettingsSectionItem *methodSwitch = [%c(YTSettingsSectionItem) switchItemWithTitle:method
-                titleDescription:isPhone && method.length > 26 ? method : nil
-                accessibilityIdentifier:nil
-                switchOn:getValue(getKey(method, classKey))
-                switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
-                    setValue(method, classKey, enabled);
-                    return YES;
-                }
-                // selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
-                //     YTAlertView *alertView = [%c(YTAlertView) infoDialog];
-                //     alertView.title = method;
-                //     alertView.subtitle = [NSString stringWithFormat:@"-[%@ %@]", classKey, method];
-                //     [alertView show];
-                //     return YES;
-                // }
-                settingItemId:0];
+                BOOL modified = [allKeys containsObject:getKey(method, classKey)];
+                NSString *modifiedTitle = modified ? [NSString stringWithFormat:@"%@ *", method] : method;
+                YTSettingsSectionItem *methodSwitch = [YTSettingsSectionItemClass switchItemWithTitle:modifiedTitle
+                    titleDescription:isPhone && method.length > 26 ? modifiedTitle : nil
+                    accessibilityIdentifier:nil
+                    switchOn:getValue(getKey(method, classKey))
+                    switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
+                        setValue(method, classKey, enabled);
+                        return YES;
+                    }
+                    // selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
+                    //     YTAlertView *alertView = [YTAlertViewClass infoDialog];
+                    //     alertView.title = method;
+                    //     alertView.subtitle = [NSString stringWithFormat:@"-[%@ %@]", classKey, method];
+                    //     [alertView show];
+                    //     return YES;
+                    // }
+                    settingItemId:0];
                 [properties[category] addObject:methodSwitch];
             }
         }
@@ -191,7 +199,7 @@ static NSString *getCategory(char c, NSString *method) {
                 [rows sortUsingDescriptors:@[sort]];
                 NSString *shortTitle = [NSString stringWithFormat:@"\"%@\" (%ld)", category, rows.count];
                 NSString *title = [NSString stringWithFormat:@"%@ %@", LOC(@"SETTINGS_START_WITH"), shortTitle];
-                YTSettingsSectionItem *sectionItem = [%c(YTSettingsSectionItem) itemWithTitle:title accessibilityIdentifier:nil detailTextBlock:nil selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
+                YTSettingsSectionItem *sectionItem = [YTSettingsSectionItemClass itemWithTitle:title accessibilityIdentifier:nil detailTextBlock:nil selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
                     YTSettingsPickerViewController *picker = [[%c(YTSettingsPickerViewController) alloc] initWithNavTitle:shortTitle pickerSectionTitle:nil rows:rows selectedItemIndex:NSNotFound parentResponder:[self parentResponder]];
                     [settingsViewController pushViewController:picker];
                     return YES;
@@ -203,8 +211,7 @@ static NSString *getCategory(char c, NSString *method) {
         }
         NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:@"title" ascending:YES];
         [sectionItems sortUsingDescriptors:@[sort]];
-        YTSettingsSectionItem *copyAll = [%c(YTSettingsSectionItem)
-            itemWithTitle:LOC(@"COPY_CURRENT_SETTINGS")
+        YTSettingsSectionItem *copyAll = [YTSettingsSectionItemClass itemWithTitle:LOC(@"COPY_CURRENT_SETTINGS")
             titleDescription:LOC(@"COPY_CURRENT_SETTINGS_DESC")
             accessibilityIdentifier:nil
             detailTextBlock:nil
@@ -227,14 +234,13 @@ static NSString *getCategory(char c, NSString *method) {
                 return YES;
             }];
         [sectionItems insertObject:copyAll atIndex:0];
-        YTSettingsSectionItem *modified = [%c(YTSettingsSectionItem)
-            itemWithTitle:LOC(@"VIEW_MODIFIED_SETTINGS")
+        YTSettingsSectionItem *modified = [YTSettingsSectionItemClass itemWithTitle:LOC(@"VIEW_MODIFIED_SETTINGS")
             titleDescription:LOC(@"VIEW_MODIFIED_SETTINGS_DESC")
             accessibilityIdentifier:nil
             detailTextBlock:nil
             selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
                 NSMutableArray *features = [NSMutableArray array];
-                for (NSString *key in [defaults dictionaryRepresentation].allKeys) {
+                for (NSString *key in allKeys) {
                     if ([key hasPrefix:Prefix]) {
                         NSString *displayKey = [key substringFromIndex:Prefix.length + 1];
                         [features addObject:[NSString stringWithFormat:@"%@: %d", displayKey, [defaults boolForKey:key]]];
@@ -243,7 +249,7 @@ static NSString *getCategory(char c, NSString *method) {
                 [features sortUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
                 [features insertObject:[NSString stringWithFormat:LOC(@"TOTAL_MODIFIED_SETTINGS"), features.count] atIndex:0];
                 NSString *content = [features componentsJoinedByString:@"\n"];
-                YTAlertView *alertView = [%c(YTAlertView) confirmationDialogWithAction:^{
+                YTAlertView *alertView = [YTAlertViewClass confirmationDialogWithAction:^{
                     UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
                     pasteboard.string = content;
                     [[%c(YTToastResponderEvent) eventWithMessage:LOC(@"COPIED_TO_CLIPBOARD") firstResponder:[self parentResponder]] send];
@@ -254,14 +260,13 @@ static NSString *getCategory(char c, NSString *method) {
                 return YES;
             }];
         [sectionItems insertObject:modified atIndex:0];
-        YTSettingsSectionItem *reset = [%c(YTSettingsSectionItem)
-            itemWithTitle:LOC(@"RESET_KILL")
+        YTSettingsSectionItem *reset = [YTSettingsSectionItemClass itemWithTitle:LOC(@"RESET_KILL")
             titleDescription:LOC(@"RESET_KILL_DESC")
             accessibilityIdentifier:nil
             detailTextBlock:nil
             selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
-                YTAlertView *alertView = [%c(YTAlertView) confirmationDialogWithAction:^{
-                    for (NSString *key in [defaults dictionaryRepresentation].allKeys) {
+                YTAlertView *alertView = [YTAlertViewClass confirmationDialogWithAction:^{
+                    for (NSString *key in allKeys) {
                         if ([key hasPrefix:Prefix])
                             [defaults removeObjectForKey:key];
                     }
@@ -273,14 +278,12 @@ static NSString *getCategory(char c, NSString *method) {
                 return YES;
             }];
         [sectionItems insertObject:reset atIndex:0];
-        YTSettingsSectionItem *group = [%c(YTSettingsSectionItem)
-            switchItemWithTitle:LOC(@"GROUPED")
+        YTSettingsSectionItem *group = [YTSettingsSectionItemClass switchItemWithTitle:LOC(@"GROUPED")
             titleDescription:nil
             accessibilityIdentifier:nil
             switchOn:groupedSettings()
             switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
-                YTAlertView *alertView = [%c(YTAlertView)
-                    confirmationDialogWithAction:^{
+                YTAlertView *alertView = [YTAlertViewClass confirmationDialogWithAction:^{
                         [defaults setBool:enabled forKey:GroupedKey];
                         exit(0);
                     }
@@ -297,8 +300,7 @@ static NSString *getCategory(char c, NSString *method) {
             settingItemId:0];
         [sectionItems insertObject:group atIndex:0];
     }
-    YTSettingsSectionItem *thread = [%c(YTSettingsSectionItem)
-        itemWithTitle:LOC(@"OPEN_MEGATHREAD")
+    YTSettingsSectionItem *thread = [YTSettingsSectionItemClass itemWithTitle:LOC(@"OPEN_MEGATHREAD")
         titleDescription:LOC(@"OPEN_MEGATHREAD_DESC")
         accessibilityIdentifier:nil
         detailTextBlock:nil
@@ -306,17 +308,14 @@ static NSString *getCategory(char c, NSString *method) {
             return [%c(YTUIUtils) openURL:[NSURL URLWithString:@"https://github.com/PoomSmart/YTABConfig/discussions"]];
         }];
     [sectionItems insertObject:thread atIndex:0];
-    YTSettingsSectionItem *master = [%c(YTSettingsSectionItem)
-        switchItemWithTitle:LOC(@"ENABLED")
+    YTSettingsSectionItem *master = [YTSettingsSectionItemClass switchItemWithTitle:LOC(@"ENABLED")
         titleDescription:LOC(@"ENABLED_DESC")
         accessibilityIdentifier:nil
         switchOn:tweakEnabled()
         switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
             [defaults setBool:enabled forKey:EnabledKey];
-            YTAlertView *alertView = [%c(YTAlertView)
-                confirmationDialogWithAction:^{
-                    exit(0);
-                } actionTitle:yesText
+            YTAlertView *alertView = [YTAlertViewClass confirmationDialogWithAction:^{ exit(0); }
+                actionTitle:yesText
                 cancelAction:^{
                     [cell setSwitchOn:!enabled animated:YES];
                 }
@@ -329,8 +328,7 @@ static NSString *getCategory(char c, NSString *method) {
         settingItemId:0];
     [sectionItems insertObject:master atIndex:0];
     YTSettingsViewController *delegate = [self valueForKey:@"_dataDelegate"];
-    [delegate
-        setSectionItems:sectionItems
+    [delegate setSectionItems:sectionItems
         forCategory:YTABCSection
         title:@"A/B"
         titleDescription:tweakEnabled() ? [NSString stringWithFormat:@"YTABConfig %@, %d feature flags.", @(OS_STRINGIFY(TWEAK_VERSION)), totalSettings] : nil
@@ -401,6 +399,9 @@ static void hookClass(NSObject *instance) {
         hookClass(globalConfig);
         hookClass(coldConfig);
         hookClass(hotConfig);
+        if (!groupedSettings()) {
+            %init(Search);
+        }
     }
     return %orig;
 }
