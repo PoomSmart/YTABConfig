@@ -14,8 +14,8 @@
 "TOTAL_MODIFIED_SETTINGS" = "合計: %ld";
 
 // Quit app alert
-"WARNING" = "Warning";
-"APPLY_DESC" = "This action will quit YouTube. Are you sure you want to continue?";
+"WARNING" = "警告";
+"APPLY_DESC" = "この操作でYouTubeアプリが終了します。本当に続けますか？";
 
 "OPEN_MEGATHREAD" = "メガスレッドを開きます";
 "OPEN_MEGATHREAD_DESC" = "各フラグの有効,無効の効果を共有,議論できるGitHubのYTABConfig メガスレッドを開きます";
