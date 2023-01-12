@@ -2,7 +2,7 @@ Package: com.ps.ytabconfig
 Name: YTABConfig
 Version: 1.0.0
 Architecture: iphoneos-arm
-Description: Configure A/B features in YouTube app.
+Description: Configure A/B features in iOS YouTube app.
 Maintainer: PoomSmart
 Author: PoomSmart
 Section: Tweaks

@@ -22,11 +22,11 @@
 #define _LOC(b, x) [b localizedStringForKey:x value:nil table:nil]
 #define LOC(x) _LOC(tweakBundle, x)
 
+static const NSInteger YTABCSection = 404;
+
 @interface YTSettingsSectionItemManager (YTABConfig)
 - (void)updateYTABCSectionWithEntry:(id)entry;
 @end
-
-static const NSInteger YTABCSection = 404;
 
 NSMutableDictionary <NSString *, NSMutableDictionary <NSString *, NSNumber *> *> *cache;
 NSUserDefaults *defaults;
@@ -80,11 +80,8 @@ NSBundle *YTABCBundle() {
         NSString *tweakBundlePath = [[NSBundle mainBundle] pathForResource:@"YTABC" ofType:@"bundle"];
         if (tweakBundlePath)
             bundle = [NSBundle bundleWithPath:tweakBundlePath];
-        else {
+        else
             bundle = [NSBundle bundleWithPath:@"/Library/Application Support/YTABC.bundle"];
-            if (!bundle)
-                bundle = [NSBundle bundleWithPath:@"/var/jb/Library/Application Support/YTABC.bundle"];
-        }
     });
     return bundle;
 }
@@ -146,7 +143,8 @@ static NSString *getCategory(char c, NSString *method) {
         if ([method hasPrefix:@"shorts"]) return @"shorts";
         if ([method hasPrefix:@"should"]) return @"should";
     }
-    return [NSString stringWithFormat:@"%c", c]; // FIXME: Yike -stringWithFormat:
+    unichar uc = (unichar)c;
+    return [NSString stringWithCharacters:&uc length:1];;
 }
 
 %hook YTSettingsSectionItemManager
@@ -192,7 +190,7 @@ static NSString *getCategory(char c, NSString *method) {
         YTSettingsViewController *settingsViewController = [self valueForKey:@"_settingsViewControllerDelegate"];
         BOOL grouped = groupedSettings();
         for (NSString *category in properties) {
-            NSMutableArray *rows = properties[category];
+            NSMutableArray <YTSettingsSectionItem *> *rows = properties[category];
             totalSettings += rows.count;
             if (grouped) {
                 NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:@"title" ascending:YES];
@@ -381,8 +379,8 @@ static void hookClass(NSObject *instance) {
 
 - (BOOL)application:(id)arg1 didFinishLaunchingWithOptions:(id)arg2 {
     defaults = [NSUserDefaults standardUserDefaults];
-    allKeys = [defaults dictionaryRepresentation].allKeys;
     if (tweakEnabled()) {
+        allKeys = [defaults dictionaryRepresentation].allKeys;
         YTGlobalConfig *globalConfig;
         YTColdConfig *coldConfig;
         YTHotConfig *hotConfig;
