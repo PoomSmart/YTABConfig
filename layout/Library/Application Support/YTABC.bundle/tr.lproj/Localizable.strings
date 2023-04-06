@@ -3,11 +3,11 @@
 "ENABLED_DESC" = "A/B ayarlarını göstermeyi etkinleştirir.";
 "GROUPED" = "Öneklere göre gruplandırılmış ayarlar";
 "RESET_KILL" = "Sıfırla ve Kapat";
-"RESET_KILL_DESC" = "Tüm değişikliklerinizi geri almak ve uygulamayı kapatmak için dokunun.";
-"COPY_CURRENT_SETTINGS" = "Mevcut ayarları kopyalayın.";
-"COPY_CURRENT_SETTINGS_DESC" = "Mevcut ayarları panoya kopyalamak için dokunun.";
+"RESET_KILL_DESC" = "Tüm değişikliklerini geri almak ve uygulamayı kapatmak için dokun.";
+"COPY_CURRENT_SETTINGS" = "Mevcut ayarları kopyala.";
+"COPY_CURRENT_SETTINGS_DESC" = "Mevcut ayarları panoya kopyalamak için dokun.";
 "VIEW_MODIFIED_SETTINGS" = "Değiştirilen ayarları görüntüle";
-"VIEW_MODIFIED_SETTINGS_DESC" = "El ile yaptığınız tüm değişiklikleri görüntülemek için dokunun.";
+"VIEW_MODIFIED_SETTINGS_DESC" = "El ile yaptığın tüm değişiklikleri görüntülemek için dokun.";
 
 // Shown in alert
 "MODIFIED_SETTINGS_TITLE" = "Değişiklikler";
@@ -17,8 +17,8 @@
 "WARNING" = "Uyarı";
 "APPLY_DESC" = "Bu eylem YouTube'u kapatacak. Devam etmek istediğine emin misin?";
 
-"OPEN_MEGATHREAD" = "Open megathread";
-"OPEN_MEGATHREAD_DESC" = "Etkinleştirilen veya devre dışı bırakılan her ayarın etkisini paylaşabileceğiniz ve tartışabileceğiniz YTABConfig megabaşlığını(megathread) GitHub'da açar.";
+"OPEN_MEGATHREAD" = "Megabaşlığı Aç";
+"OPEN_MEGATHREAD_DESC" = "Etkinleştirilen veya devre dışı bırakılan her ayarın etkisini paylaşabileceğin ve tartışabileceğin YTABConfig megabaşlığını(megathread) GitHub'da açar.";
 "SETTINGS_START_WITH" = "Yazılan ile başlayan ayarlar";
 
 // Clipboard
