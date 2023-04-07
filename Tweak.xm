@@ -1,3 +1,4 @@
+#import <rootless.h>
 #import "../YouTubeHeader/YTAlertView.h"
 #import "../YouTubeHeader/YTAppDelegate.h"
 #import "../YouTubeHeader/YTCommonUtils.h"
@@ -85,7 +86,7 @@ NSBundle *YTABCBundle() {
         if (tweakBundlePath)
             bundle = [NSBundle bundleWithPath:tweakBundlePath];
         else
-            bundle = [NSBundle bundleWithPath:@"/Library/Application Support/YTABC.bundle"];
+            bundle = [NSBundle bundleWithPath:ROOT_PATH_NS(@"/Library/Application Support/YTABC.bundle")];
     });
     return bundle;
 }
