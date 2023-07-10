@@ -1,0 +1,30 @@
+// Settings
+"ENABLED" = "Activé";
+"ENABLED_DESC" = "Activer pour afficher les paramètres A/B.";
+"GROUPED" = "Paramètres groupés par préfixes";
+"RESET_KILL" = "Réinitialiser et quitter";
+"RESET_KILL_DESC" = "Appuyez pour annuler toutes vos modifications et quitter l'application.";
+"COPY_CURRENT_SETTINGS" = "Copier les paramètres actuels";
+"COPY_CURRENT_SETTINGS_DESC" = "Appuyez pour copier les paramètres actuels dans le presse-papiers.";
+"VIEW_MODIFIED_SETTINGS" = "Voir les paramètres modifiés";
+"VIEW_MODIFIED_SETTINGS_DESC" = "Appuyez pour voir toutes les modifications que vous avez effectuées manuellement.";
+
+// Shown in alert
+"MODIFIED_SETTINGS_TITLE" = "Modifications";
+"TOTAL_MODIFIED_SETTINGS" = "Total : %ld";
+
+// Quit app alert
+"WARNING" = "Avertissement";
+"APPLY_DESC" = "Cette action fermera YouTube. Voulez-vous vraiment continuer ?";
+
+"OPEN_MEGATHREAD" = "Ouvrir le méga-thread";
+"OPEN_MEGATHREAD_DESC" = "Ouvrir le méga-thread YTABConfig sur GitHub où vous pouvez partager et discuter de l'effet de chaque drapeau activé ou désactivé.";
+"SETTINGS_START_WITH" = "Paramètres commençant par";
+
+// Clipboard
+
+// Shown in alert
+"COPY_TO_CLIPBOARD" = "Copier dans le presse-papiers";
+
+// Shown in toast
+"COPIED_TO_CLIPBOARD" = "Copié dans le presse-papiers.";
