@@ -14,8 +14,8 @@
 "TOTAL_MODIFIED_SETTINGS" = "Total: %ld";
 
 // Quit app alert
-"WARNING" = "Warning";
-"APPLY_DESC" = "This action will quit YouTube. Are you sure you want to continue?";
+"WARNING" = "Warnung";
+"APPLY_DESC" = "Diese Aktion wird YouTube beenden. Sind Sie sicher, dass Sie fortfahren möchten?";
 
 "OPEN_MEGATHREAD" = "Megathread öffnen";
 "OPEN_MEGATHREAD_DESC" = "Öffne den YTABConfig Megathread auf GitHub, in dem Sie sich über die Auswirkungen der Aktivierung bzw. Deaktivierung der einzelnen Einstellungen austauschen und diskutieren können.";
