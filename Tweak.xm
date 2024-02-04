@@ -350,11 +350,21 @@ static NSString *getCategory(char c, NSString *method) {
         settingItemId:0];
     [sectionItems insertObject:master atIndex:0];
     YTSettingsViewController *delegate = [self valueForKey:@"_dataDelegate"];
-    [delegate setSectionItems:sectionItems
-        forCategory:YTABCSection
-        title:@"A/B"
-        titleDescription:tweakEnabled() ? [NSString stringWithFormat:@"YTABConfig %@, %d feature flags.", @(OS_STRINGIFY(TWEAK_VERSION)), totalSettings] : nil
-        headerHidden:NO];
+    NSString *title = @"A/B";
+    NSString *titleDescription = tweakEnabled() ? [NSString stringWithFormat:@"YTABConfig %@, %d feature flags.", @(OS_STRINGIFY(TWEAK_VERSION)), totalSettings] : nil;
+    if ([delegate respondsToSelector:@selector(setSectionItems:forCategory:title:icon:titleDescription:headerHidden:)])
+        [delegate setSectionItems:sectionItems
+            forCategory:YTABCSection
+            title:title
+            icon:nil
+            titleDescription:titleDescription
+            headerHidden:NO];
+    else
+        [delegate setSectionItems:sectionItems
+            forCategory:YTABCSection
+            title:title
+            titleDescription:titleDescription
+            headerHidden:NO];
 }
 
 - (void)updateSectionForCategory:(NSUInteger)category withEntry:(id)entry {
