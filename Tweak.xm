@@ -1,18 +1,18 @@
 #import <rootless.h>
-#import "../YouTubeHeader/YTAlertView.h"
-#import "../YouTubeHeader/YTAppDelegate.h"
-#import "../YouTubeHeader/YTCommonUtils.h"
-#import "../YouTubeHeader/YTUIUtils.h"
-#import "../YouTubeHeader/YTVersionUtils.h"
-#import "../YouTubeHeader/YTGlobalConfig.h"
-#import "../YouTubeHeader/YTColdConfig.h"
-#import "../YouTubeHeader/YTHotConfig.h"
-#import "../YouTubeHeader/YTSettingsSectionItem.h"
-#import "../YouTubeHeader/YTSettingsSectionItemManager.h"
-#import "../YouTubeHeader/YTSettingsPickerViewController.h"
-#import "../YouTubeHeader/YTSettingsViewController.h"
-#import "../YouTubeHeader/YTSearchableSettingsViewController.h"
-#import "../YouTubeHeader/YTToastResponderEvent.h"
+#import <YouTubeHeader/YTAlertView.h>
+#import <YouTubeHeader/YTAppDelegate.h>
+#import <YouTubeHeader/YTCommonUtils.h>
+#import <YouTubeHeader/YTUIUtils.h>
+#import <YouTubeHeader/YTVersionUtils.h>
+#import <YouTubeHeader/YTGlobalConfig.h>
+#import <YouTubeHeader/YTColdConfig.h>
+#import <YouTubeHeader/YTHotConfig.h>
+#import <YouTubeHeader/YTSettingsSectionItem.h>
+#import <YouTubeHeader/YTSettingsSectionItemManager.h>
+#import <YouTubeHeader/YTSettingsPickerViewController.h>
+#import <YouTubeHeader/YTSettingsViewController.h>
+#import <YouTubeHeader/YTSearchableSettingsViewController.h>
+#import <YouTubeHeader/YTToastResponderEvent.h>
 
 #define Prefix @"YTABC"
 #define EnabledKey @"EnabledYTABC"
