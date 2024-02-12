@@ -9,8 +9,8 @@
 "VIEW_MODIFIED_SETTINGS" = "查看修改的設定";
 "VIEW_MODIFIED_SETTINGS_DESC" = "點擊查看您修改的所有設定";
 "IMPORT_SETTINGS" = "Import settings";
-"IMPORT_SETTINGS_DESC" = "Import the settings from the clipboard.";
-"NOTHING_TO_IMPORT" = "Nothing found from the clipboard.";
+"IMPORT_SETTINGS_DESC" = "Import the settings from the clipboard.\nEach setting must be in this format: %@";
+"NOTHING_TO_IMPORT" = "Nothing found from the clipboard or there will be no changes after importing it.";
 "SETTINGS_TO_IMPORT" = "Settings to import";
 "SETTINGS_TO_IMPORT_DESC" = "Found %ld valid settings to be imported.";
 "IMPORT" = "Import";

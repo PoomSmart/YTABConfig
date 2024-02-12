@@ -9,8 +9,8 @@
 "VIEW_MODIFIED_SETTINGS" = "変更された設定を表示します";
 "VIEW_MODIFIED_SETTINGS_DESC" = "タップすると手動で行った全ての変更を表示します";
 "IMPORT_SETTINGS" = "Import settings";
-"IMPORT_SETTINGS_DESC" = "Import the settings from the clipboard.";
-"NOTHING_TO_IMPORT" = "Nothing found from the clipboard.";
+"IMPORT_SETTINGS_DESC" = "Import the settings from the clipboard.\nEach setting must be in this format: %@";
+"NOTHING_TO_IMPORT" = "Nothing found from the clipboard or there will be no changes after importing it.";
 "SETTINGS_TO_IMPORT" = "Settings to import";
 "SETTINGS_TO_IMPORT_DESC" = "Found %ld valid settings to be imported.";
 "IMPORT" = "Import";

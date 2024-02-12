@@ -243,7 +243,7 @@ static NSString *getCategory(char c, NSString *method) {
 
         // Import settings
         YTSettingsSectionItem *import = [YTSettingsSectionItemClass itemWithTitle:LOC(@"IMPORT_SETTINGS")
-            titleDescription:LOC(@"IMPORT_SETTINGS_DESC")
+            titleDescription:[NSString stringWithFormat:LOC(@"IMPORT_SETTINGS_DESC"), @"YT(Cold|Hot|Global)Config.*: (0|1)"]
             accessibilityIdentifier:nil
             detailTextBlock:nil
             selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
@@ -258,9 +258,12 @@ static NSString *getCategory(char c, NSString *method) {
                     NSTextCheckingResult *match = [regex firstMatchInString:line options:0 range:NSMakeRange(0, [line length])];
                     if (match) {
                         NSString *key = [line substringWithRange:[match rangeAtIndex:1]];
-                        if ([cache valueForKeyPath:key] == nil) continue;
-                        NSString *valueString = [line substringWithRange:[match rangeAtIndex:2]]; 
-                        int integerValue = [valueString integerValue]; 
+                        id cacheValue = [cache valueForKeyPath:key];
+                        if (cacheValue == nil) continue;
+                        NSString *valueString = [line substringWithRange:[match rangeAtIndex:2]];
+                        int integerValue = [valueString integerValue];
+                        if (integerValue == 0 && ![cacheValue boolValue]) continue;
+                        if (integerValue == 1 && [cacheValue boolValue]) continue;
                         importedSettings[key] = @(integerValue);
                         [reportedSettings addObject:[NSString stringWithFormat:@"%@: %d", key, integerValue]];
                     }
@@ -299,7 +302,7 @@ static NSString *getCategory(char c, NSString *method) {
                 NSMutableArray *content = [NSMutableArray array];
                 for (NSString *classKey in cache) {
                     [cache[classKey] enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSNumber *value, BOOL* stop) {
-                        [content addObject:[NSString stringWithFormat:@"%@: %d", key, [value boolValue]]];
+                        [content addObject:[NSString stringWithFormat:@"%@.%@: %d", classKey, key, [value boolValue]]];
                     }];
                 }
                 [content sortUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
