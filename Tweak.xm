@@ -60,6 +60,11 @@ static void setValue(NSString *method, NSString *classKey, BOOL value) {
     [defaults setBool:value forKey:getKey(method, classKey)];
 }
 
+static void setValueFromImport(NSString *settingKey, BOOL value) {
+    [cache setValue:@(value) forKeyPath:settingKey];
+    [defaults setBool:value forKey:[NSString stringWithFormat:@"%@.%@", Prefix, settingKey]];
+}
+
 static void updateAllKeys() {
     allKeys = [defaults dictionaryRepresentation].allKeys;
 }
@@ -81,7 +86,7 @@ static BOOL getValueFromInvocation(id target, SEL selector) {
 NSBundle *YTABCBundle() {
     static NSBundle *bundle = nil;
     static dispatch_once_t onceToken;
-	dispatch_once(&onceToken, ^{
+    dispatch_once(&onceToken, ^{
         NSString *tweakBundlePath = [[NSBundle mainBundle] pathForResource:@"YTABC" ofType:@"bundle"];
         if (tweakBundlePath)
             bundle = [NSBundle bundleWithPath:tweakBundlePath];
@@ -165,7 +170,9 @@ static NSString *getCategory(char c, NSString *method) {
     NSString *deleteText = _LOC([NSBundle mainBundle], @"search.action.delete");
     Class YTSettingsSectionItemClass = %c(YTSettingsSectionItem);
     Class YTAlertViewClass = %c(YTAlertView);
+
     if (tweakEnabled()) {
+        // AB flags
         NSMutableDictionary <NSString *, NSMutableArray <YTSettingsSectionItem *> *> *properties = [NSMutableDictionary dictionary];
         for (NSString *classKey in cache) {
             for (NSString *method in cache[classKey]) {
@@ -175,6 +182,7 @@ static NSString *getCategory(char c, NSString *method) {
                 updateAllKeys();
                 BOOL modified = [allKeys containsObject:getKey(method, classKey)];
                 NSString *modifiedTitle = modified ? [NSString stringWithFormat:@"%@ *", method] : method;
+
                 YTSettingsSectionItem *methodSwitch = [YTSettingsSectionItemClass switchItemWithTitle:modifiedTitle
                     titleDescription:isPhone && method.length > 26 ? modifiedTitle : nil
                     accessibilityIdentifier:nil
@@ -219,6 +227,7 @@ static NSString *getCategory(char c, NSString *method) {
                 [rows sortUsingDescriptors:@[sort]];
                 NSString *shortTitle = [NSString stringWithFormat:@"\"%@\" (%ld)", category, rows.count];
                 NSString *title = [NSString stringWithFormat:@"%@ %@", LOC(@"SETTINGS_START_WITH"), shortTitle];
+
                 YTSettingsSectionItem *sectionItem = [YTSettingsSectionItemClass itemWithTitle:title accessibilityIdentifier:nil detailTextBlock:nil selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
                     YTSettingsPickerViewController *picker = [[%c(YTSettingsPickerViewController) alloc] initWithNavTitle:shortTitle pickerSectionTitle:nil rows:rows selectedItemIndex:NSNotFound parentResponder:[self parentResponder]];
                     [settingsViewController pushViewController:picker];
@@ -231,6 +240,56 @@ static NSString *getCategory(char c, NSString *method) {
         }
         NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:@"title" ascending:YES];
         [sectionItems sortUsingDescriptors:@[sort]];
+
+        // Import settings
+        YTSettingsSectionItem *import = [YTSettingsSectionItemClass itemWithTitle:LOC(@"IMPORT_SETTINGS")
+            titleDescription:LOC(@"IMPORT_SETTINGS_DESC")
+            accessibilityIdentifier:nil
+            detailTextBlock:nil
+            selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
+                UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
+                NSArray *lines = [pasteboard.string componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+                NSString *pattern = @"^(YT.*Config\\..*):\\s*(\\d)$";
+                NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:nil];
+                NSMutableDictionary *importedSettings = [NSMutableDictionary dictionary];
+                NSMutableArray *reportedSettings = [NSMutableArray array];
+
+                for (NSString *line in lines) {
+                    NSTextCheckingResult *match = [regex firstMatchInString:line options:0 range:NSMakeRange(0, [line length])];
+                    if (match) {
+                        NSString *key = [line substringWithRange:[match rangeAtIndex:1]];
+                        if ([cache valueForKeyPath:key] == nil) continue;
+                        NSString *valueString = [line substringWithRange:[match rangeAtIndex:2]]; 
+                        int integerValue = [valueString integerValue]; 
+                        importedSettings[key] = @(integerValue);
+                        [reportedSettings addObject:[NSString stringWithFormat:@"%@: %d", key, integerValue]];
+                    }
+                }
+
+                if (reportedSettings.count == 0) {
+                    YTAlertView *alertView = [YTAlertViewClass infoDialog];
+                    alertView.title = LOC(@"SETTINGS_TO_IMPORT");
+                    alertView.subtitle = LOC(@"NOTHING_TO_IMPORT");
+                    [alertView show];
+                    return NO;
+                }
+
+                [reportedSettings insertObject:[NSString stringWithFormat:LOC(@"SETTINGS_TO_IMPORT_DESC"), reportedSettings.count] atIndex:0];
+
+                YTAlertView *alertView = [YTAlertViewClass confirmationDialogWithAction:^{
+                    for (NSString *key in importedSettings) {
+                        setValueFromImport(key, [importedSettings[key] boolValue]);
+                    }
+                    updateAllKeys();
+                } actionTitle:LOC(@"IMPORT")];
+                alertView.title = LOC(@"SETTINGS_TO_IMPORT");
+                alertView.subtitle = [reportedSettings componentsJoinedByString:@"\n"];
+                [alertView show];
+                return YES;
+            }];
+        [sectionItems insertObject:import atIndex:0];
+
+        // Copy current settings
         YTSettingsSectionItem *copyAll = [YTSettingsSectionItemClass itemWithTitle:LOC(@"COPY_CURRENT_SETTINGS")
             titleDescription:LOC(@"COPY_CURRENT_SETTINGS_DESC")
             accessibilityIdentifier:nil
@@ -254,6 +313,8 @@ static NSString *getCategory(char c, NSString *method) {
                 return YES;
             }];
         [sectionItems insertObject:copyAll atIndex:0];
+
+        // View modified settings
         YTSettingsSectionItem *modified = [YTSettingsSectionItemClass itemWithTitle:LOC(@"VIEW_MODIFIED_SETTINGS")
             titleDescription:LOC(@"VIEW_MODIFIED_SETTINGS_DESC")
             accessibilityIdentifier:nil
@@ -281,6 +342,8 @@ static NSString *getCategory(char c, NSString *method) {
                 return YES;
             }];
         [sectionItems insertObject:modified atIndex:0];
+
+        // Reset and kill
         YTSettingsSectionItem *reset = [YTSettingsSectionItemClass itemWithTitle:LOC(@"RESET_KILL")
             titleDescription:LOC(@"RESET_KILL_DESC")
             accessibilityIdentifier:nil
@@ -300,6 +363,8 @@ static NSString *getCategory(char c, NSString *method) {
                 return YES;
             }];
         [sectionItems insertObject:reset atIndex:0];
+
+        // Grouped settings
         YTSettingsSectionItem *group = [YTSettingsSectionItemClass switchItemWithTitle:LOC(@"GROUPED")
             titleDescription:nil
             accessibilityIdentifier:nil
@@ -322,6 +387,8 @@ static NSString *getCategory(char c, NSString *method) {
             settingItemId:0];
         [sectionItems insertObject:group atIndex:0];
     }
+
+    // Open megathread
     YTSettingsSectionItem *thread = [YTSettingsSectionItemClass itemWithTitle:LOC(@"OPEN_MEGATHREAD")
         titleDescription:LOC(@"OPEN_MEGATHREAD_DESC")
         accessibilityIdentifier:nil
@@ -330,6 +397,8 @@ static NSString *getCategory(char c, NSString *method) {
             return [%c(YTUIUtils) openURL:[NSURL URLWithString:@"https://github.com/PoomSmart/YTABConfig/discussions"]];
         }];
     [sectionItems insertObject:thread atIndex:0];
+
+    // Killswitch
     YTSettingsSectionItem *master = [YTSettingsSectionItemClass switchItemWithTitle:LOC(@"ENABLED")
         titleDescription:LOC(@"ENABLED_DESC")
         accessibilityIdentifier:nil
@@ -345,10 +414,11 @@ static NSString *getCategory(char c, NSString *method) {
             alertView.title = LOC(@"WARNING");
             alertView.subtitle = LOC(@"APPLY_DESC");
             [alertView show];
-            return YES;
+            return NO;
         }
         settingItemId:0];
     [sectionItems insertObject:master atIndex:0];
+
     YTSettingsViewController *delegate = [self valueForKey:@"_dataDelegate"];
     NSString *title = @"A/B";
     NSString *titleDescription = tweakEnabled() ? [NSString stringWithFormat:@"YTABConfig %@, %d feature flags.", @(OS_STRINGIFY(TWEAK_VERSION)), totalSettings] : nil;

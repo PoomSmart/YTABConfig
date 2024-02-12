@@ -8,6 +8,12 @@
 "COPY_CURRENT_SETTINGS_DESC" = "Érintse meg az aktuális beállítások vágólapra másolásához.";
 "VIEW_MODIFIED_SETTINGS" = "A módosított beállítások megtekintése";
 "VIEW_MODIFIED_SETTINGS_DESC" = "Érintse meg az összes manuális módosítás megtekintéséhez.";
+"IMPORT_SETTINGS" = "Import settings";
+"IMPORT_SETTINGS_DESC" = "Import the settings from the clipboard.";
+"NOTHING_TO_IMPORT" = "Nothing found from the clipboard.";
+"SETTINGS_TO_IMPORT" = "Settings to import";
+"SETTINGS_TO_IMPORT_DESC" = "Found %ld valid settings to be imported.";
+"IMPORT" = "Import";
 
 // Shown in alert
 "MODIFIED_SETTINGS_TITLE" = "Változtatások";
