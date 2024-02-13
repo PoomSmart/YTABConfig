@@ -8,11 +8,11 @@
 "COPY_CURRENT_SETTINGS_DESC" = "Apăsați pentru a copia setările curente în clipboard.";
 "VIEW_MODIFIED_SETTINGS" = "Vizualizare setări modificate";
 "VIEW_MODIFIED_SETTINGS_DESC" = "Apăsați pentru a vizualiza toate modificările efectuate.";
-"IMPORT_SETTINGS" = "Import settings";
-"IMPORT_SETTINGS_DESC" = "Import the settings from the clipboard.\nEach setting must be in this format: %@";
-"NOTHING_TO_IMPORT" = "Nothing found from the clipboard or there will be no changes after importing it.";
-"SETTINGS_TO_IMPORT" = "Settings to import";
-"SETTINGS_TO_IMPORT_DESC" = "Found %ld valid settings to be imported.";
+"IMPORT_SETTINGS" = "Importare setări";
+"IMPORT_SETTINGS_DESC" = "Importă setările din clipboard.\nFiecare setare trebuie să fie în acest format: %@";
+"NOTHING_TO_IMPORT" = "Nu a fost găsit nimic în clipboard sau nu va apărea nicio schimbare în urma importului.";
+"SETTINGS_TO_IMPORT" = "Setări de importat";
+"SETTINGS_TO_IMPORT_DESC" = "Au fost găsite %ld setări valide pentru a fi importate.";
 "IMPORT" = "Import";
 
 // Shown in alert
