@@ -7,7 +7,7 @@ include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = YTABConfig
 
-$(TWEAK_NAME)_FILES = Tweak.xm
+$(TWEAK_NAME)_FILES = Settings.x Tweak.x
 $(TWEAK_NAME)_CFLAGS = -fobjc-arc -DTWEAK_VERSION=$(PACKAGE_VERSION)
 $(TWEAK_NAME)_FRAMEWORKS = UIKit
 

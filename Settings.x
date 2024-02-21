@@ -1,18 +1,14 @@
-#import <rootless.h>
 #import <YouTubeHeader/YTAlertView.h>
-#import <YouTubeHeader/YTAppDelegate.h>
 #import <YouTubeHeader/YTCommonUtils.h>
-#import <YouTubeHeader/YTUIUtils.h>
-#import <YouTubeHeader/YTVersionUtils.h>
-#import <YouTubeHeader/YTGlobalConfig.h>
-#import <YouTubeHeader/YTColdConfig.h>
-#import <YouTubeHeader/YTHotConfig.h>
 #import <YouTubeHeader/YTSettingsSectionItem.h>
 #import <YouTubeHeader/YTSettingsSectionItemManager.h>
 #import <YouTubeHeader/YTSettingsPickerViewController.h>
 #import <YouTubeHeader/YTSettingsViewController.h>
 #import <YouTubeHeader/YTSearchableSettingsViewController.h>
 #import <YouTubeHeader/YTToastResponderEvent.h>
+#import <YouTubeHeader/YTUIUtils.h>
+#import <YouTubeHeader/YTVersionUtils.h>
+#import <rootless.h>
 
 #define Prefix @"YTABC"
 #define EnabledKey @"EnabledYTABC"
@@ -29,58 +25,16 @@ static const NSInteger YTABCSection = 404;
 - (void)updateYTABCSectionWithEntry:(id)entry;
 @end
 
-NSMutableDictionary <NSString *, NSMutableDictionary <NSString *, NSNumber *> *> *cache;
+extern NSMutableDictionary <NSString *, NSMutableDictionary <NSString *, NSNumber *> *> *cache;
 NSUserDefaults *defaults;
 NSArray <NSString *> *allKeys;
 
-static BOOL tweakEnabled() {
+BOOL tweakEnabled() {
     return [defaults boolForKey:EnabledKey];
 }
 
-static BOOL groupedSettings() {
+BOOL groupedSettings() {
     return [defaults boolForKey:GroupedKey];
-}
-
-static NSString *getKey(NSString *method, NSString *classKey) {
-    return [NSString stringWithFormat:@"%@.%@.%@", Prefix, classKey, method];
-}
-
-static NSString *getCacheKey(NSString *method, NSString *classKey) {
-    return [NSString stringWithFormat:@"%@.%@", classKey, method];
-}
-
-static BOOL getValue(NSString *methodKey) {
-    if (![allKeys containsObject:methodKey])
-        return [[cache valueForKeyPath:[methodKey substringFromIndex:Prefix.length + 1]] boolValue];
-    return [defaults boolForKey:methodKey];
-}
-
-static void setValue(NSString *method, NSString *classKey, BOOL value) {
-    [cache setValue:@(value) forKeyPath:getCacheKey(method, classKey)];
-    [defaults setBool:value forKey:getKey(method, classKey)];
-}
-
-static void setValueFromImport(NSString *settingKey, BOOL value) {
-    [cache setValue:@(value) forKeyPath:settingKey];
-    [defaults setBool:value forKey:[NSString stringWithFormat:@"%@.%@", Prefix, settingKey]];
-}
-
-static void updateAllKeys() {
-    allKeys = [defaults dictionaryRepresentation].allKeys;
-}
-
-static BOOL returnFunction(id const self, SEL _cmd) {
-    NSString *method = NSStringFromSelector(_cmd);
-    NSString *methodKey = getKey(method, NSStringFromClass([self class]));
-    return getValue(methodKey);
-}
-
-static BOOL getValueFromInvocation(id target, SEL selector) {
-    NSInvocationOperation *i = [[NSInvocationOperation alloc] initWithTarget:target selector:selector object:nil];
-    [i start];
-    BOOL result = NO;
-    [i.result getValue:&result];
-    return result;
 }
 
 NSBundle *YTABCBundle() {
@@ -96,6 +50,34 @@ NSBundle *YTABCBundle() {
     return bundle;
 }
 
+NSString *getKey(NSString *method, NSString *classKey) {
+    return [NSString stringWithFormat:@"%@.%@.%@", Prefix, classKey, method];
+}
+
+static NSString *getCacheKey(NSString *method, NSString *classKey) {
+    return [NSString stringWithFormat:@"%@.%@", classKey, method];
+}
+
+BOOL getValue(NSString *methodKey) {
+    if (![allKeys containsObject:methodKey])
+        return [[cache valueForKeyPath:[methodKey substringFromIndex:Prefix.length + 1]] boolValue];
+    return [defaults boolForKey:methodKey];
+}
+
+static void setValue(NSString *method, NSString *classKey, BOOL value) {
+    [cache setValue:@(value) forKeyPath:getCacheKey(method, classKey)];
+    [defaults setBool:value forKey:getKey(method, classKey)];
+}
+
+static void setValueFromImport(NSString *settingKey, BOOL value) {
+    [cache setValue:@(value) forKeyPath:settingKey];
+    [defaults setBool:value forKey:[NSString stringWithFormat:@"%@.%@", Prefix, settingKey]];
+}
+
+void updateAllKeys() {
+    allKeys = [defaults dictionaryRepresentation].allKeys;
+}
+
 %group Search
 
 %hook YTSettingsViewController
@@ -103,12 +85,12 @@ NSBundle *YTABCBundle() {
 - (void)loadWithModel:(id)model fromView:(UIView *)view {
     %orig;
     if ([[self valueForKey:@"_detailsCategoryID"] integerValue] == YTABCSection)
-        MSHookIvar<BOOL>(self, "_shouldShowSearchBar") = YES;
+        [self setValue:@(YES) forKey:@"_shouldShowSearchBar"];
 }
 
 - (void)setSectionControllers {
     %orig;
-    if (MSHookIvar<BOOL>(self, "_shouldShowSearchBar")) {
+    if ([[self valueForKey:@"_shouldShowSearchBar"] boolValue]) {
         YTSettingsSectionController *settingsSectionController = [self settingsSectionControllers][[self valueForKey:@"_detailsCategoryID"]];
         if (settingsSectionController) {
             YTSearchableSettingsViewController *searchableVC = [self valueForKey:@"_searchableSettingsViewController"];
@@ -450,76 +432,11 @@ static NSString *getCategory(char c, NSString *method) {
 
 %end
 
-static NSMutableArray <NSString *> *getBooleanMethods(Class clz) {
-    NSMutableArray *allMethods = [NSMutableArray array];
-    unsigned int methodCount = 0;
-    Method *methods = class_copyMethodList(clz, &methodCount);
-    for (unsigned int i = 0; i < methodCount; ++i) {
-        Method method = methods[i];
-        const char *name = sel_getName(method_getName(method));
-        if (strstr(name, "ndroid") || strstr(name, "musicClient") || strstr(name, "amsterdam") || strstr(name, "unplugged")) continue;
-        const char *encoding = method_getTypeEncoding(method);
-        if (strcmp(encoding, "B16@0:8")) continue;
-        NSString *selector = [NSString stringWithUTF8String:name];
-        if (![allMethods containsObject:selector])
-            [allMethods addObject:selector];
-    }
-    free(methods);
-    return allMethods;
+void SearchHook() {
+    %init(Search);
 }
-
-static void hookClass(NSObject *instance) {
-    if (!instance) [NSException raise:@"hookClass Invalid argument exception" format:@"Hooking the class of a non-existing instance"];
-    Class instanceClass = [instance class];
-    NSMutableArray <NSString *> *methods = getBooleanMethods(instanceClass);
-    NSString *classKey = NSStringFromClass(instanceClass);
-    NSMutableDictionary *classCache = cache[classKey] = [NSMutableDictionary new];
-    for (NSString *method in methods) {
-        SEL selector = NSSelectorFromString(method);
-        BOOL result = getValueFromInvocation(instance, selector);
-        classCache[method] = @(result);
-        MSHookMessageEx(instanceClass, selector, (IMP)returnFunction, NULL);
-    }
-}
-
-%hook YTAppDelegate
-
-- (BOOL)application:(id)arg1 didFinishLaunchingWithOptions:(id)arg2 {
-    defaults = [NSUserDefaults standardUserDefaults];
-    if (tweakEnabled()) {
-        updateAllKeys();
-        YTGlobalConfig *globalConfig;
-        YTColdConfig *coldConfig;
-        YTHotConfig *hotConfig;
-        @try {
-            globalConfig = [self valueForKey:@"_globalConfig"];
-            coldConfig = [self valueForKey:@"_coldConfig"];
-            hotConfig = [self valueForKey:@"_hotConfig"];
-        } @catch (id ex) {
-            id settings = [self valueForKey:@"_settings"];
-            globalConfig = [settings valueForKey:@"_globalConfig"];
-            coldConfig = [settings valueForKey:@"_coldConfig"];
-            hotConfig = [settings valueForKey:@"_hotConfig"];
-        }
-        hookClass(globalConfig);
-        hookClass(coldConfig);
-        hookClass(hotConfig);
-        if (!groupedSettings()) {
-            %init(Search);
-        }
-    }
-    return %orig;
-}
-
-%end
 
 %ctor {
-    NSBundle *bundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@/Frameworks/Module_Framework.framework", [[NSBundle mainBundle] bundlePath]]];
-    if (!bundle.loaded) [bundle load];
-    cache = [NSMutableDictionary new];
+    defaults = [NSUserDefaults standardUserDefaults];
     %init;
-}
-
-%dtor {
-    [cache removeAllObjects];
 }
