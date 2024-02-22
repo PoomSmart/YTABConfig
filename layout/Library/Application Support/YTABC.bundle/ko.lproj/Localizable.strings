@@ -8,6 +8,12 @@
 "COPY_CURRENT_SETTINGS_DESC" = "현재 설정을 클립보드로 복사하려면 탭하세요.";
 "VIEW_MODIFIED_SETTINGS" = "수정된 설정 보기";
 "VIEW_MODIFIED_SETTINGS_DESC" = "수동으로 변경한 모든 내용을 보려면 탭하세요.";
+"IMPORT_SETTINGS" = "Import settings";
+"IMPORT_SETTINGS_DESC" = "Import the settings from the clipboard.\nEach setting must be in this format: %@";
+"NOTHING_TO_IMPORT" = "Nothing found from the clipboard or there will be no changes after importing it.";
+"SETTINGS_TO_IMPORT" = "Settings to import";
+"SETTINGS_TO_IMPORT_DESC" = "Found %ld valid settings to be imported.";
+"IMPORT" = "Import";
 
 // Shown in alert
 "MODIFIED_SETTINGS_TITLE" = "변경 사항";

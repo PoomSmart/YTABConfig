@@ -8,6 +8,12 @@
 "COPY_CURRENT_SETTINGS_DESC" = "Tippe hier, um alle Einstellungen in die Zwischenablage zu kopieren.";
 "VIEW_MODIFIED_SETTINGS" = "Modifizierte Einstellungen anzeigen";
 "VIEW_MODIFIED_SETTINGS_DESC" = "Tippe hier, um alle manuelle Änderungen zu sehen.";
+"IMPORT_SETTINGS" = "Import settings";
+"IMPORT_SETTINGS_DESC" = "Import the settings from the clipboard.\nEach setting must be in this format: %@";
+"NOTHING_TO_IMPORT" = "Nothing found from the clipboard or there will be no changes after importing it.";
+"SETTINGS_TO_IMPORT" = "Settings to import";
+"SETTINGS_TO_IMPORT_DESC" = "Found %ld valid settings to be imported.";
+"IMPORT" = "Import";
 
 // Shown in alert
 "MODIFIED_SETTINGS_TITLE" = "Änderungen";

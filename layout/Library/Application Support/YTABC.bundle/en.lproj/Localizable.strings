@@ -5,9 +5,15 @@
 "RESET_KILL" = "Reset and Kill";
 "RESET_KILL_DESC" = "Tap to undo all of your changes and kill the app.";
 "COPY_CURRENT_SETTINGS" = "Copy current settings";
-"COPY_CURRENT_SETTINGS_DESC" = "Tap to copy the current settings to clipboard.";
+"COPY_CURRENT_SETTINGS_DESC" = "Tap to copy the current settings to the clipboard.";
 "VIEW_MODIFIED_SETTINGS" = "View modified settings";
 "VIEW_MODIFIED_SETTINGS_DESC" = "Tap to view all the changes you made manually.";
+"IMPORT_SETTINGS" = "Import settings";
+"IMPORT_SETTINGS_DESC" = "Import the settings from the clipboard.\nEach setting must be in this format: %@";
+"NOTHING_TO_IMPORT" = "Nothing found from the clipboard or there will be no changes after importing it.";
+"SETTINGS_TO_IMPORT" = "Settings to import";
+"SETTINGS_TO_IMPORT_DESC" = "Found %ld valid settings to be imported.";
+"IMPORT" = "Import";
 
 // Shown in alert
 "MODIFIED_SETTINGS_TITLE" = "Changes";
