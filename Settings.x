@@ -1,3 +1,4 @@
+#import <YouTubeHeader/GOOHUDManagerInternal.h>
 #import <YouTubeHeader/YTAlertView.h>
 #import <YouTubeHeader/YTCommonUtils.h>
 #import <YouTubeHeader/YTSettingsSectionItem.h>
@@ -5,7 +6,6 @@
 #import <YouTubeHeader/YTSettingsPickerViewController.h>
 #import <YouTubeHeader/YTSettingsViewController.h>
 #import <YouTubeHeader/YTSearchableSettingsViewController.h>
-#import <YouTubeHeader/YTToastResponderEvent.h>
 #import <YouTubeHeader/YTUIUtils.h>
 #import <YouTubeHeader/YTVersionUtils.h>
 #import <rootless.h>
@@ -181,7 +181,7 @@ static NSString *getCategory(char c, NSString *method) {
                         [alertView addTitle:LOC(@"COPY_TO_CLIPBOARD") withAction:^{
                             UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
                             pasteboard.string = content;
-                            [[%c(YTToastResponderEvent) eventWithMessage:LOC(@"COPIED_TO_CLIPBOARD") firstResponder:[self parentResponder]] send];
+                            [[%c(GOOHUDManagerInternal) sharedInstance] showMessageMainThread:[%c(YTHUDMessage) messageWithText:LOC(@"COPIED_TO_CLIPBOARD")]];
                         }];
                         updateAllKeys();
                         NSString *key = getKey(method, classKey);
@@ -294,7 +294,7 @@ static NSString *getCategory(char c, NSString *method) {
                 [content insertObject:INCLUDED_CLASSES atIndex:0];
                 [content insertObject:[NSString stringWithFormat:@"YTABConfig version: %@", @(OS_STRINGIFY(TWEAK_VERSION))] atIndex:0];
                 pasteboard.string = [content componentsJoinedByString:@"\n"];
-                [[%c(YTToastResponderEvent) eventWithMessage:LOC(@"COPIED_TO_CLIPBOARD") firstResponder:[self parentResponder]] send];
+                [[%c(GOOHUDManagerInternal) sharedInstance] showMessageMainThread:[%c(YTHUDMessage) messageWithText:LOC(@"COPIED_TO_CLIPBOARD")]];
                 return YES;
             }];
         [sectionItems insertObject:copyAll atIndex:0];
@@ -319,7 +319,7 @@ static NSString *getCategory(char c, NSString *method) {
                 YTAlertView *alertView = [YTAlertViewClass confirmationDialogWithAction:^{
                     UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
                     pasteboard.string = content;
-                    [[%c(YTToastResponderEvent) eventWithMessage:LOC(@"COPIED_TO_CLIPBOARD") firstResponder:[self parentResponder]] send];
+                    [[%c(GOOHUDManagerInternal) sharedInstance] showMessageMainThread:[%c(YTHUDMessage) messageWithText:LOC(@"COPIED_TO_CLIPBOARD")]];
                 } actionTitle:LOC(@"COPY_TO_CLIPBOARD")];
                 alertView.title = LOC(@"MODIFIED_SETTINGS_TITLE");
                 alertView.subtitle = content;
@@ -362,6 +362,7 @@ static NSString *getCategory(char c, NSString *method) {
                     actionTitle:yesText
                     cancelAction:^{
                         [cell setSwitchOn:!enabled animated:YES];
+                        [defaults setBool:!enabled forKey:GroupedKey];
                     }
                     cancelTitle:cancelText];
                 alertView.title = LOC(@"WARNING");
@@ -394,12 +395,13 @@ static NSString *getCategory(char c, NSString *method) {
                 actionTitle:yesText
                 cancelAction:^{
                     [cell setSwitchOn:!enabled animated:YES];
+                    [defaults setBool:!enabled forKey:EnabledKey];
                 }
                 cancelTitle:cancelText];
             alertView.title = LOC(@"WARNING");
             alertView.subtitle = LOC(@"APPLY_DESC");
             [alertView show];
-            return NO;
+            return YES;
         }
         settingItemId:0];
     [sectionItems insertObject:master atIndex:0];
