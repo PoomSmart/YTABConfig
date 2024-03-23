@@ -1,19 +1,19 @@
 // Settings
 "ENABLED" = "有効";
-"ENABLED_DESC" = "A/Bの設定を表示します";
-"GROUPED" = "プレフィックスで設定をグループ化します";
-"RESET_KILL" = "リセットして終了します";
-"RESET_KILL_DESC" = "タップして変更を全て取り消し、アプリを終了する";
-"COPY_CURRENT_SETTINGS" = "現在の設定をコピーします";
-"COPY_CURRENT_SETTINGS_DESC" = "タップして現在の設定をクリップボードにコピーします";
-"VIEW_MODIFIED_SETTINGS" = "変更された設定を表示します";
-"VIEW_MODIFIED_SETTINGS_DESC" = "タップすると手動で行った全ての変更を表示します";
-"IMPORT_SETTINGS" = "Import settings";
-"IMPORT_SETTINGS_DESC" = "Import the settings from the clipboard.\nEach setting must be in this format: %@";
-"NOTHING_TO_IMPORT" = "Nothing found from the clipboard or there will be no changes after importing it.";
-"SETTINGS_TO_IMPORT" = "Settings to import";
-"SETTINGS_TO_IMPORT_DESC" = "Found %ld valid settings to be imported.";
-"IMPORT" = "Import";
+"ENABLED_DESC" = "A/B設定を表示するには有効にします";
+"GROUPED" = "接頭語で設定をグループ化";
+"RESET_KILL" = "リセットして終了";
+"RESET_KILL_DESC" = "タップすると変更を全てリセットしてアプリを終了します";
+"COPY_CURRENT_SETTINGS" = "現在の設定をコピー";
+"COPY_CURRENT_SETTINGS_DESC" = "タップすると現在の設定をクリップボードにコピーします";
+"VIEW_MODIFIED_SETTINGS" = "変更された設定を表示";
+"VIEW_MODIFIED_SETTINGS_DESC" = "タップすると手動で変更された設定を全て表示します";
+"IMPORT_SETTINGS" = "設定をインポート";
+"IMPORT_SETTINGS_DESC" = "リップボードから設定をインポートします。\n各設定は次の形式である必要があります: %@";
+"NOTHING_TO_IMPORT" = "クリップボードから何も見つからないか、インポート後も変更点はありません";
+"SETTINGS_TO_IMPORT" = "インポートする設定";
+"SETTINGS_TO_IMPORT_DESC" = "インポートできる有効な設定が%ld個見つかりました";
+"IMPORT" = "インポート";
 
 // Shown in alert
 "MODIFIED_SETTINGS_TITLE" = "変更点";
@@ -21,16 +21,16 @@
 
 // Quit app alert
 "WARNING" = "警告";
-"APPLY_DESC" = "この操作でYouTubeアプリが終了します。本当に続けますか？";
+"APPLY_DESC" = "この操作によりYouTubeアプリが終了します。本当に続けますか？";
 
-"OPEN_MEGATHREAD" = "メガスレッドを開きます";
-"OPEN_MEGATHREAD_DESC" = "各フラグの有効,無効の効果を共有,議論できるGitHubのYTABConfig メガスレッドを開きます";
-"SETTINGS_START_WITH" = "から始まる設定";
+"OPEN_MEGATHREAD" = "メガスレッドを開く";
+"OPEN_MEGATHREAD_DESC" = "GitHub上のYTABConfigメガスレッドを開きます。各フラグの有効/無効の効果について共有および議論できます。";
+"SETTINGS_START_WITH" = "次の接頭語で始まる設定";
 
 // Clipboard
 
 // Shown in alert
-"COPY_TO_CLIPBOARD" = "クリップボードにコピーします";
+"COPY_TO_CLIPBOARD" = "クリップボードにコピー";
 
 // Shown in toast
 "COPIED_TO_CLIPBOARD" = "クリップボードにコピーしました";
