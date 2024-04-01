@@ -9,6 +9,7 @@
 #import <YouTubeHeader/YTUIUtils.h>
 #import <YouTubeHeader/YTVersionUtils.h>
 #import <rootless.h>
+#import <sys/utsname.h>
 
 #define Prefix @"YTABC"
 #define EnabledKey @"EnabledYTABC"
@@ -76,6 +77,12 @@ static void setValueFromImport(NSString *settingKey, BOOL value) {
 
 void updateAllKeys() {
     allKeys = [defaults dictionaryRepresentation].allKeys;
+}
+
+static NSString *getHardwareModel() {
+    struct utsname systemInfo;
+    uname(&systemInfo);
+    return [NSString stringWithUTF8String:systemInfo.machine];
 }
 
 %group Search
@@ -288,7 +295,7 @@ static NSString *getCategory(char c, NSString *method) {
                     }];
                 }
                 [content sortUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
-                [content insertObject:[NSString stringWithFormat:@"Device model: %@", [%c(YTCommonUtils) hardwareModel]] atIndex:0];
+                [content insertObject:[NSString stringWithFormat:@"Device model: %@", getHardwareModel()] atIndex:0];
                 [content insertObject:[NSString stringWithFormat:@"App version: %@", [%c(YTVersionUtils) appVersion]] atIndex:0];
                 [content insertObject:EXCLUDED_METHODS atIndex:0];
                 [content insertObject:INCLUDED_CLASSES atIndex:0];
