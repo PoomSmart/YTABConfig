@@ -1,19 +1,19 @@
 // Settings
 "ENABLED" = "Etkinleştir";
-"ENABLED_DESC" = "A/B ayarlarını göstermeyi etkinleştirir.";
-"GROUPED" = "Öneklere göre gruplandırılmış ayarlar";
+"ENABLED_DESC" = "A/B ayarlarını aç.";
+"GROUPED" = "Gruplandırılmış ayarlar";
 "RESET_KILL" = "Sıfırla ve Kapat";
-"RESET_KILL_DESC" = "Tüm değişikliklerini geri almak ve uygulamayı kapatmak için dokun.";
-"COPY_CURRENT_SETTINGS" = "Mevcut ayarları kopyala.";
-"COPY_CURRENT_SETTINGS_DESC" = "Mevcut ayarları panoya kopyalamak için dokun.";
-"VIEW_MODIFIED_SETTINGS" = "Değiştirilen ayarları görüntüle";
-"VIEW_MODIFIED_SETTINGS_DESC" = "El ile yaptığın tüm değişiklikleri görüntülemek için dokun.";
-"IMPORT_SETTINGS" = "Import settings";
-"IMPORT_SETTINGS_DESC" = "Import the settings from the clipboard.\nEach setting must be in this format: %@";
-"NOTHING_TO_IMPORT" = "Nothing found from the clipboard or there will be no changes after importing it.";
-"SETTINGS_TO_IMPORT" = "Settings to import";
-"SETTINGS_TO_IMPORT_DESC" = "Found %ld valid settings to be imported.";
-"IMPORT" = "Import";
+"RESET_KILL_DESC" = "Değişiklikleri geri al ve uyg. kapat.";
+"COPY_CURRENT_SETTINGS" = "Ayarları kopyala";
+"COPY_CURRENT_SETTINGS_DESC" = "Mevcut ayarları panoya kopyala.";
+"VIEW_MODIFIED_SETTINGS" = "Değişiklikleri görüntüle";
+"VIEW_MODIFIED_SETTINGS_DESC" = "El ile yaptığın değişiklikleri görüntüle.";
+"IMPORT_SETTINGS" = "Ayarları İçe Aktar";
+"IMPORT_SETTINGS_DESC" = "Panodan ayarları içe aktar.\nHer ayar şu formatta olmalı: %@";
+"NOTHING_TO_IMPORT" = "Panoda içe aktarılacak bir şey yok veya değişiklik olmayacak.";
+"SETTINGS_TO_IMPORT" = "İçe aktarılacak ayarlar";
+"SETTINGS_TO_IMPORT_DESC" = "%ld geçerli ayar bulundu.";
+"IMPORT" = "İçe Aktar";
 
 // Shown in alert
 "MODIFIED_SETTINGS_TITLE" = "Değişiklikler";
@@ -21,10 +21,10 @@
 
 // Quit app alert
 "WARNING" = "Uyarı";
-"APPLY_DESC" = "Bu eylem YouTube'u kapatacak. Devam etmek istediğine emin misin?";
+"APPLY_DESC" = "Bu işlem YouTube'u kapatacak. Devam etmek istiyor musun?";
 
 "OPEN_MEGATHREAD" = "Megabaşlığı Aç";
-"OPEN_MEGATHREAD_DESC" = "Etkinleştirilen veya devre dışı bırakılan her ayarın etkisini paylaşabileceğin ve tartışabileceğin YTABConfig megabaşlığını(megathread) GitHub'da açar.";
+"OPEN_MEGATHREAD_DESC" = "YTABConfig megabaşlığını GitHub'da açar.";
 "SETTINGS_START_WITH" = "Yazılan ile başlayan ayarlar";
 
 // Clipboard
