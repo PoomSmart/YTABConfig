@@ -110,14 +110,6 @@ static NSString *getHardwareModel() {
 
 %end
 
-%hook YTSettingsSectionController
-
-- (void)setSelectedItem:(NSUInteger)selectedItem {
-    if (selectedItem != NSNotFound) %orig;
-}
-
-%end
-
 %hook YTAppSettingsPresentationData
 
 + (NSArray *)settingsCategoryOrder {
@@ -216,9 +208,12 @@ static NSString *getCategory(char c, NSString *method) {
                 [rows sortUsingDescriptors:@[sort]];
                 NSString *shortTitle = [NSString stringWithFormat:@"\"%@\" (%ld)", category, rows.count];
                 NSString *title = [NSString stringWithFormat:@"%@ %@", LOC(@"SETTINGS_START_WITH"), shortTitle];
+                YTSettingsSectionItem *headerItem = [YTSettingsSectionItemClass itemWithTitle:title accessibilityIdentifier:nil detailTextBlock:nil selectBlock:nil];
+                headerItem.enabled = NO;
+                [rows insertObject:headerItem atIndex:0];
 
                 YTSettingsSectionItem *sectionItem = [YTSettingsSectionItemClass itemWithTitle:title accessibilityIdentifier:nil detailTextBlock:nil selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
-                    YTSettingsPickerViewController *picker = [[%c(YTSettingsPickerViewController) alloc] initWithNavTitle:shortTitle pickerSectionTitle:nil rows:rows selectedItemIndex:NSNotFound parentResponder:[self parentResponder]];
+                    YTSettingsPickerViewController *picker = [[%c(YTSettingsPickerViewController) alloc] initWithNavTitle:shortTitle pickerSectionTitle:nil rows:rows selectedItemIndex:0 parentResponder:[self parentResponder]];
                     [settingsViewController pushViewController:picker];
                     return YES;
                 }];
@@ -245,17 +240,16 @@ static NSString *getCategory(char c, NSString *method) {
 
                 for (NSString *line in lines) {
                     NSTextCheckingResult *match = [regex firstMatchInString:line options:0 range:NSMakeRange(0, [line length])];
-                    if (match) {
-                        NSString *key = [line substringWithRange:[match rangeAtIndex:1]];
-                        id cacheValue = [cache valueForKeyPath:key];
-                        if (cacheValue == nil) continue;
-                        NSString *valueString = [line substringWithRange:[match rangeAtIndex:2]];
-                        int integerValue = [valueString integerValue];
-                        if (integerValue == 0 && ![cacheValue boolValue]) continue;
-                        if (integerValue == 1 && [cacheValue boolValue]) continue;
-                        importedSettings[key] = @(integerValue);
-                        [reportedSettings addObject:[NSString stringWithFormat:@"%@: %d", key, integerValue]];
-                    }
+                    if (!match) continue;
+                    NSString *key = [line substringWithRange:[match rangeAtIndex:1]];
+                    id cacheValue = [cache valueForKeyPath:key];
+                    if (cacheValue == nil) continue;
+                    NSString *valueString = [line substringWithRange:[match rangeAtIndex:2]];
+                    int integerValue = [valueString integerValue];
+                    if (integerValue == 0 && ![cacheValue boolValue]) continue;
+                    if (integerValue == 1 && [cacheValue boolValue]) continue;
+                    importedSettings[key] = @(integerValue);
+                    [reportedSettings addObject:[NSString stringWithFormat:@"%@: %d", key, integerValue]];
                 }
 
                 if (reportedSettings.count == 0) {
