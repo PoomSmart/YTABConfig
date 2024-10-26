@@ -410,14 +410,16 @@ static NSString *getCategory(char c, NSString *method) {
     YTSettingsViewController *delegate = [self valueForKey:@"_dataDelegate"];
     NSString *title = @"A/B";
     NSString *titleDescription = tweakEnabled() ? [NSString stringWithFormat:@"YTABConfig %@, %d feature flags.", @(OS_STRINGIFY(TWEAK_VERSION)), totalSettings] : nil;
-    if ([delegate respondsToSelector:@selector(setSectionItems:forCategory:title:icon:titleDescription:headerHidden:)])
+    if ([delegate respondsToSelector:@selector(setSectionItems:forCategory:title:icon:titleDescription:headerHidden:)]) {
+        YTIIcon *icon = [%c(YTIIcon) new];
+        icon.iconType = YT_EXPERIMENT;
         [delegate setSectionItems:sectionItems
             forCategory:YTABCSection
             title:title
-            icon:nil
+            icon:icon
             titleDescription:titleDescription
             headerHidden:NO];
-    else
+    } else
         [delegate setSectionItems:sectionItems
             forCategory:YTABCSection
             title:title
