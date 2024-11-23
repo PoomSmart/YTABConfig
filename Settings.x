@@ -1,11 +1,11 @@
 #import <YouTubeHeader/GOOHUDManagerInternal.h>
 #import <YouTubeHeader/YTAlertView.h>
 #import <YouTubeHeader/YTCommonUtils.h>
+#import <YouTubeHeader/YTSearchableSettingsViewController.h>
+#import <YouTubeHeader/YTSettingsPickerViewController.h>
 #import <YouTubeHeader/YTSettingsSectionItem.h>
 #import <YouTubeHeader/YTSettingsSectionItemManager.h>
-#import <YouTubeHeader/YTSettingsPickerViewController.h>
 #import <YouTubeHeader/YTSettingsViewController.h>
-#import <YouTubeHeader/YTSearchableSettingsViewController.h>
 #import <YouTubeHeader/YTUIUtils.h>
 #import <YouTubeHeader/YTVersionUtils.h>
 #import <rootless.h>
@@ -97,13 +97,11 @@ static NSString *getHardwareModel() {
 
 - (void)setSectionControllers {
     %orig;
-    if ([[self valueForKey:@"_shouldShowSearchBar"] boolValue]) {
-        YTSettingsSectionController *settingsSectionController = [self settingsSectionControllers][[self valueForKey:@"_detailsCategoryID"]];
-        if (settingsSectionController) {
-            YTSearchableSettingsViewController *searchableVC = [self valueForKey:@"_searchableSettingsViewController"];
-            [searchableVC storeCollectionViewSections:@[settingsSectionController]];
-        }
-    }
+    if (![[self valueForKey:@"_shouldShowSearchBar"] boolValue]) return;
+    YTSettingsSectionController *settingsSectionController = [self settingsSectionControllers][[self valueForKey:@"_detailsCategoryID"]];
+    if (settingsSectionController == nil) return;
+    YTSearchableSettingsViewController *searchableVC = [self valueForKey:@"_searchableSettingsViewController"];
+    [searchableVC storeCollectionViewSections:@[settingsSectionController]];
 }
 
 %end
