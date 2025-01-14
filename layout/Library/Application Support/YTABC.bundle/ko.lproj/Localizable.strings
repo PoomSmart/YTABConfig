@@ -8,20 +8,20 @@
 "COPY_CURRENT_SETTINGS_DESC" = "현재 설정을 클립보드로 복사하려면 탭하세요.";
 "VIEW_MODIFIED_SETTINGS" = "수정된 설정 보기";
 "VIEW_MODIFIED_SETTINGS_DESC" = "수동으로 변경한 모든 내용을 보려면 탭하세요.";
-"IMPORT_SETTINGS" = "Import settings";
-"IMPORT_SETTINGS_DESC" = "Import the settings from the clipboard.\nEach setting must be in this format: %@";
-"NOTHING_TO_IMPORT" = "Nothing found from the clipboard or there will be no changes after importing it.";
-"SETTINGS_TO_IMPORT" = "Settings to import";
-"SETTINGS_TO_IMPORT_DESC" = "Found %ld valid settings to be imported.";
-"IMPORT" = "Import";
+"IMPORT_SETTINGS" = "설정 가져오기";
+"IMPORT_SETTINGS_DESC" = "클립보드에서 설정을 가져옵니다.\n각 설정은 다음 형식이어야 합니다: %@";
+"NOTHING_TO_IMPORT" = "클립보드에서 찾을 수 없거나 가져온 후 변경 사항이 없습니다.";
+"SETTINGS_TO_IMPORT" = "가져올 설정";
+"SETTINGS_TO_IMPORT_DESC" = "가져올 유효한 설정 %ld개를 찾았습니다.";
+"IMPORT" = "가져오기";
 
 // Shown in alert
 "MODIFIED_SETTINGS_TITLE" = "변경 사항";
 "TOTAL_MODIFIED_SETTINGS" = "총합: %ld";
 
 // Quit app alert
-"WARNING" = "Warning";
-"APPLY_DESC" = "This action will quit YouTube. Are you sure you want to continue?";
+"WARNING" = "경고";
+"APPLY_DESC" = "이 작업은 YouTube를 종료합니다. 계속하시겠습니까?";
 
 "OPEN_MEGATHREAD" = "메가스레드 열기";
 "OPEN_MEGATHREAD_DESC" = "GitHub에서 YTABConfig 메가스레드를 열어 각 플래그가 활성화 또는 비활성화되는 효과를 공유하고 논의할 수 있습니다.";

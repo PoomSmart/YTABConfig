@@ -44,10 +44,7 @@ NSBundle *YTABCBundle() {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         NSString *tweakBundlePath = [[NSBundle mainBundle] pathForResource:@"YTABC" ofType:@"bundle"];
-        if (tweakBundlePath)
-            bundle = [NSBundle bundleWithPath:tweakBundlePath];
-        else
-            bundle = [NSBundle bundleWithPath:ROOT_PATH_NS(@"/Library/Application Support/YTABC.bundle")];
+        bundle = [NSBundle bundleWithPath:tweakBundlePath ?: ROOT_PATH_NS(@"/Library/Application Support/" Prefix ".bundle")];
     });
     return bundle;
 }
@@ -123,11 +120,11 @@ static NSString *getHardwareModel() {
 
 %hook YTAppSettingsPresentationData
 
-+ (NSArray *)settingsCategoryOrder {
-    NSArray *order = %orig;
-    NSMutableArray *mutableOrder = [order mutableCopy];
++ (NSArray <NSNumber *> *)settingsCategoryOrder {
+    NSArray <NSNumber *> *order = %orig;
+    NSMutableArray <NSNumber *> *mutableOrder = [order mutableCopy];
     [mutableOrder insertObject:@(YTABCSection) atIndex:0];
-    return mutableOrder;
+    return mutableOrder.copy;
 }
 
 %end

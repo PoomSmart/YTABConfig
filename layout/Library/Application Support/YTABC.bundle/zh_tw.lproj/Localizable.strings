@@ -8,12 +8,12 @@
 "COPY_CURRENT_SETTINGS_DESC" = "點擊將目前的設定複製到剪貼簿";
 "VIEW_MODIFIED_SETTINGS" = "查看修改的設定";
 "VIEW_MODIFIED_SETTINGS_DESC" = "點擊查看您修改的所有設定";
-"IMPORT_SETTINGS" = "Import settings";
-"IMPORT_SETTINGS_DESC" = "Import the settings from the clipboard.\nEach setting must be in this format: %@";
-"NOTHING_TO_IMPORT" = "Nothing found from the clipboard or there will be no changes after importing it.";
-"SETTINGS_TO_IMPORT" = "Settings to import";
-"SETTINGS_TO_IMPORT_DESC" = "Found %ld valid settings to be imported.";
-"IMPORT" = "Import";
+"IMPORT_SETTINGS" = "匯入設定";
+"IMPORT_SETTINGS_DESC" = "從剪貼簿匯入設定。\n每個設定必須是這種格式: %@";
+"NOTHING_TO_IMPORT" = "從剪貼簿中找不到任何內容或匯入後不會有任何變更。";
+"SETTINGS_TO_IMPORT" = "要匯入的設定";
+"SETTINGS_TO_IMPORT_DESC" = "找到 %ld 個有效的設定可以匯入。";
+"IMPORT" = "匯入";
 
 // Shown in alert
 "MODIFIED_SETTINGS_TITLE" = "已變更的";

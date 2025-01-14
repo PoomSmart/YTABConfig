@@ -1,7 +1,11 @@
-TARGET := iphone:clang:latest:11.0
+ifeq ($(THEOS_PACKAGE_SCHEME),rootless)
+TARGET = iphone:clang:latest:15.0
+else
+TARGET = iphone:clang:latest:11.0
+endif
 INSTALL_TARGET_PROCESSES = YouTube
 ARCHS = arm64
-PACKAGE_VERSION = 1.7.6
+PACKAGE_VERSION = 1.7.7
 
 include $(THEOS)/makefiles/common.mk
 

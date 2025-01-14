@@ -8,20 +8,20 @@
 "COPY_CURRENT_SETTINGS_DESC" = "Érintse meg az aktuális beállítások vágólapra másolásához.";
 "VIEW_MODIFIED_SETTINGS" = "A módosított beállítások megtekintése";
 "VIEW_MODIFIED_SETTINGS_DESC" = "Érintse meg az összes manuális módosítás megtekintéséhez.";
-"IMPORT_SETTINGS" = "Import settings";
-"IMPORT_SETTINGS_DESC" = "Import the settings from the clipboard.\nEach setting must be in this format: %@";
-"NOTHING_TO_IMPORT" = "Nothing found from the clipboard or there will be no changes after importing it.";
-"SETTINGS_TO_IMPORT" = "Settings to import";
-"SETTINGS_TO_IMPORT_DESC" = "Found %ld valid settings to be imported.";
-"IMPORT" = "Import";
+"IMPORT_SETTINGS" = "Beállítások importálása";
+"IMPORT_SETTINGS_DESC" = "Importálja a beállításokat a vágólapról.\nMinden beállításnak ebben a formátumban kell lennie: %@";
+"NOTHING_TO_IMPORT" = "Nem található semmi a vágólapon, vagy nem lesz változás az importálás után.";
+"SETTINGS_TO_IMPORT" = "Importálandó beállítások";
+"SETTINGS_TO_IMPORT_DESC" = "Talált %ld érvényes beállítást az importáláshoz.";
+"IMPORT" = "Importálás";
 
 // Shown in alert
 "MODIFIED_SETTINGS_TITLE" = "Változtatások";
 "TOTAL_MODIFIED_SETTINGS" = "Teljes: %ld";
 
 // Quit app alert
-"WARNING" = "Warning";
-"APPLY_DESC" = "This action will quit YouTube. Are you sure you want to continue?";
+"WARNING" = "Figyelem";
+"APPLY_DESC" = "Ez a művelet kilépteti a YouTube-ot. Biztosan folytatni szeretné?";
 
 "OPEN_MEGATHREAD" = "Megaszál megnyitása";
 "OPEN_MEGATHREAD_DESC" = "Nyissa meg az YTABConfig megaszálat a GitHubon, ahol megoszthatja és megvitathatja az egyes jelzők engedélyezésének vagy letiltásának hatását.";
