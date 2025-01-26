@@ -1,3 +1,4 @@
+#import <PSHeader/Misc.h>
 #import <YouTubeHeader/GOOHUDManagerInternal.h>
 #import <YouTubeHeader/YTAlertView.h>
 #import <YouTubeHeader/YTCommonUtils.h>
@@ -9,7 +10,6 @@
 #import <YouTubeHeader/YTSettingsViewController.h>
 #import <YouTubeHeader/YTUIUtils.h>
 #import <YouTubeHeader/YTVersionUtils.h>
-#import <rootless.h>
 #import <sys/utsname.h>
 
 #define Prefix @"YTABC"
@@ -44,7 +44,7 @@ NSBundle *YTABCBundle() {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         NSString *tweakBundlePath = [[NSBundle mainBundle] pathForResource:@"YTABC" ofType:@"bundle"];
-        bundle = [NSBundle bundleWithPath:tweakBundlePath ?: ROOT_PATH_NS(@"/Library/Application Support/" Prefix ".bundle")];
+        bundle = [NSBundle bundleWithPath:tweakBundlePath ?: PS_ROOT_PATH_NS(@"/Library/Application Support/" Prefix ".bundle")];
     });
     return bundle;
 }

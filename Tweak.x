@@ -92,8 +92,7 @@ static void hookClass(NSObject *instance) {
 %end
 
 %ctor {
-    NSBundle *bundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@/Frameworks/Module_Framework.framework", [[NSBundle mainBundle] bundlePath]]];
-    if (!bundle.loaded) [bundle load];
+    [[NSBundle bundleWithPath:[NSString stringWithFormat:@"%@/Frameworks/Module_Framework.framework", [[NSBundle mainBundle] bundlePath]]] load];
     cache = [NSMutableDictionary new];
     %init;
 }
