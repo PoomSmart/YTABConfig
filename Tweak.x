@@ -36,7 +36,7 @@ static NSMutableArray <NSString *> *getBooleanMethods(Class clz) {
     for (unsigned int i = 0; i < methodCount; ++i) {
         Method method = methods[i];
         const char *name = sel_getName(method_getName(method));
-        if (strstr(name, "ndroid") || strstr(name, "musicClient") || strstr(name, "amsterdam") || strstr(name, "unplugged")) continue;
+        if (strstr(name, "ndroid") || strstr(name, "musicClient") || strstr(name, "musicOfflineClient") || strstr(name, "amsterdam") || strstr(name, "unplugged") || strstr(name, "kidsClient")) continue;
         const char *encoding = method_getTypeEncoding(method);
         if (strcmp(encoding, "B16@0:8")) continue;
         NSString *selector = [NSString stringWithUTF8String:name];

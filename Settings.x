@@ -1,4 +1,5 @@
 #import <PSHeader/Misc.h>
+#import <YouTubeHeader/UIDevice+YouTube.h>
 #import <YouTubeHeader/GOOHUDManagerInternal.h>
 #import <YouTubeHeader/YTAlertView.h>
 #import <YouTubeHeader/YTCommonUtils.h>
@@ -10,13 +11,12 @@
 #import <YouTubeHeader/YTSettingsViewController.h>
 #import <YouTubeHeader/YTUIUtils.h>
 #import <YouTubeHeader/YTVersionUtils.h>
-#import <sys/utsname.h>
 
 #define Prefix @"YTABC"
 #define EnabledKey @"EnabledYTABC"
 #define GroupedKey @"GroupedYTABC"
 #define INCLUDED_CLASSES @"Included classes: YTGlobalConfig, YTColdConfig, YTHotConfig"
-#define EXCLUDED_METHODS @"Excluded settings: android*, amsterdam*, musicClient* and unplugged*"
+#define EXCLUDED_METHODS @"Excluded settings: android*, amsterdam*, kidsClient*, musicClient*, musicOfflineClient* and unplugged*"
 
 #define _LOC(b, x) [b localizedStringForKey:x value:nil table:nil]
 #define LOC(x) _LOC(tweakBundle, x)
@@ -75,12 +75,6 @@ static void setValueFromImport(NSString *settingKey, BOOL value) {
 
 void updateAllKeys() {
     allKeys = [defaults dictionaryRepresentation].allKeys;
-}
-
-static NSString *getHardwareModel() {
-    struct utsname systemInfo;
-    uname(&systemInfo);
-    return [NSString stringWithUTF8String:systemInfo.machine];
 }
 
 %group Search
@@ -297,7 +291,7 @@ static NSString *getCategory(char c, NSString *method) {
                     }];
                 }
                 [content sortUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
-                [content insertObject:[NSString stringWithFormat:@"Device model: %@", getHardwareModel()] atIndex:0];
+                [content insertObject:[NSString stringWithFormat:@"Device model: %@", [UIDevice machineName]] atIndex:0];
                 [content insertObject:[NSString stringWithFormat:@"App version: %@", [%c(YTVersionUtils) appVersion]] atIndex:0];
                 [content insertObject:EXCLUDED_METHODS atIndex:0];
                 [content insertObject:INCLUDED_CLASSES atIndex:0];
