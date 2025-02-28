@@ -1,4 +1,3 @@
-// Settings
 "ENABLED" = "Diaktifkan";
 "ENABLED_DESC" = "Aktifkan untuk menampilkan pengaturan A/B.";
 "GROUPED" = "Pengaturan dikelompokkan berdasarkan prefiks";

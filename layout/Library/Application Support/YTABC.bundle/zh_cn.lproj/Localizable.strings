@@ -1,4 +1,3 @@
-// Settings
 "ENABLED" = "启用";
 "ENABLED_DESC" = "显示和应用 A/B 测试选项。";
 "GROUPED" = "按首字母或前缀词分组";

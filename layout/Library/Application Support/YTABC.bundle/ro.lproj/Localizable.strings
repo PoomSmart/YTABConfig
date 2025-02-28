@@ -1,4 +1,3 @@
-// Settings
 "ENABLED" = "Activat";
 "ENABLED_DESC" = "Activați pentru a afișa setările A/B.";
 "GROUPED" = "Setări grupate după prefix";

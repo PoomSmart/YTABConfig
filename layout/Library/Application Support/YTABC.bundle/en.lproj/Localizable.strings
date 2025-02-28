@@ -1,4 +1,3 @@
-// Settings
 "ENABLED" = "Enabled";
 "ENABLED_DESC" = "Enable to show A/B settings.";
 "GROUPED" = "Grouped settings by prefixes";

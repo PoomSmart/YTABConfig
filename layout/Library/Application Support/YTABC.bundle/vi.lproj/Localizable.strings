@@ -1,4 +1,3 @@
-// Settings
 "ENABLED" = "Kích hoạt";
 "ENABLED_DESC" = "Kích hoạt tinh chỉnh để hiện cài đặt của các thử nghiệm A/B.";
 "GROUPED" = "Gộp các cài đặt lại theo vần";

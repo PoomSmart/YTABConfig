@@ -1,4 +1,3 @@
-// Settings
 "ENABLED" = "Engedélyezve";
 "ENABLED_DESC" = "Engedélyezze az A/B beállítások megjelenítését.";
 "GROUPED" = "A beállítások előtagok szerint csoportosítva";

@@ -1,4 +1,3 @@
-// Settings
 "ENABLED" = "Ativado";
 "ENABLED_DESC" = "Ative para mostrar as configurações A/B.";
 "GROUPED" = "Configurações agrupadas por prefixos";

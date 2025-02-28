@@ -1,4 +1,3 @@
-// Settings
 "ENABLED" = "Etkinleştir";
 "ENABLED_DESC" = "A/B ayarlarını aç.";
 "GROUPED" = "Gruplandırılmış ayarlar";

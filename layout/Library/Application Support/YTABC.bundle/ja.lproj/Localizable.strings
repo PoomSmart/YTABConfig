@@ -1,4 +1,3 @@
-// Settings
 "ENABLED" = "有効";
 "ENABLED_DESC" = "A/B設定を表示するには有効にします";
 "GROUPED" = "接頭語で設定をグループ化";

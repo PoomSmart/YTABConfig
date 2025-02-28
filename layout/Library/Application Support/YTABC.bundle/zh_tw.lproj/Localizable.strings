@@ -1,4 +1,3 @@
-// Settings
 "ENABLED" = "啟用";
 "ENABLED_DESC" = "啟用並顯示 A/B 設定";
 "GROUPED" = "將設定以前綴分組";
