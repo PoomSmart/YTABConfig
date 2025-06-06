@@ -83,17 +83,21 @@ void updateAllKeys() {
 
 - (void)loadWithModel:(id)model fromView:(UIView *)view {
     %orig;
-    if ([[self valueForKey:@"_detailsCategoryID"] integerValue] == YTABCSection)
-        [self setValue:@(YES) forKey:@"_shouldShowSearchBar"];
+    @try {
+        if ([[self valueForKey:@"_detailsCategoryID"] integerValue] == YTABCSection)
+            [self setValue:@(YES) forKey:@"_shouldShowSearchBar"];
+    } @catch (id ex) {}
 }
 
 - (void)setSectionControllers {
     %orig;
-    if (![[self valueForKey:@"_shouldShowSearchBar"] boolValue]) return;
-    YTSettingsSectionController *settingsSectionController = [self settingsSectionControllers][[self valueForKey:@"_detailsCategoryID"]];
-    if (settingsSectionController == nil) return;
-    YTSearchableSettingsViewController *searchableVC = [self valueForKey:@"_searchableSettingsViewController"];
-    [searchableVC storeCollectionViewSections:@[settingsSectionController]];
+    @try {
+        if (![[self valueForKey:@"_shouldShowSearchBar"] boolValue]) return;
+        YTSettingsSectionController *settingsSectionController = [self settingsSectionControllers][[self valueForKey:@"_detailsCategoryID"]];
+        if (settingsSectionController == nil) return;
+        YTSearchableSettingsViewController *searchableVC = [self valueForKey:@"_searchableSettingsViewController"];
+        [searchableVC storeCollectionViewSections:@[settingsSectionController]];
+    } @catch (id ex) {}
 }
 
 %end

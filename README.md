@@ -1,6 +1,6 @@
 # YTABConfig
 
-Configure A/B settings in iOS YouTube app.
+Configures A/B settings in iOS YouTube app.
 
 ## Supported YouTube versions
 

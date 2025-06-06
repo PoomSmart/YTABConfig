@@ -74,10 +74,12 @@ static void hookClass(NSObject *instance) {
             coldConfig = [self valueForKey:@"_coldConfig"];
             hotConfig = [self valueForKey:@"_hotConfig"];
         } @catch (id ex) {
-            id settings = [self valueForKey:@"_settings"];
-            globalConfig = [settings valueForKey:@"_globalConfig"];
-            coldConfig = [settings valueForKey:@"_coldConfig"];
-            hotConfig = [settings valueForKey:@"_hotConfig"];
+            @try {
+                id settings = [self valueForKey:@"_settings"];
+                globalConfig = [settings valueForKey:@"_globalConfig"];
+                coldConfig = [settings valueForKey:@"_coldConfig"];
+                hotConfig = [settings valueForKey:@"_hotConfig"];
+            } @catch (id ex) {}
         }
         hookClass(globalConfig);
         hookClass(coldConfig);
