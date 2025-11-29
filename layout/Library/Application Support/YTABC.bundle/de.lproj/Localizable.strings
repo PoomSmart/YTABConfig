@@ -33,3 +33,8 @@
 
 // Shown in toast
 "COPIED_TO_CLIPBOARD" = "In die Zwischenablage kopiert.";
+
+"REMOVED" = "(Entfernt)";
+
+"REMOVE_REMOVED_SETTINGS" = "Entfernte Einstellungen löschen";
+"REMOVE_REMOVED_SETTINGS_DESC" = "Dies wird %ld Einstellungen entfernen, die in YouTube nicht mehr verfügbar sind.";

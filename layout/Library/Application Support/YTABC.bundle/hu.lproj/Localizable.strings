@@ -33,3 +33,8 @@
 
 // Shown in toast
 "COPIED_TO_CLIPBOARD" = "Vágólapra másolva.";
+
+"REMOVED" = "(Eltávolítva)";
+
+"REMOVE_REMOVED_SETTINGS" = "Eltávolított beállítások törlése";
+"REMOVE_REMOVED_SETTINGS_DESC" = "Ez törölni fogja a(z) %ld beállítást, amelyek már nem érhetők el a YouTube-ban.";

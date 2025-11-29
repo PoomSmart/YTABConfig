@@ -33,3 +33,8 @@
 
 // Shown in toast
 "COPIED_TO_CLIPBOARD" = "已复制到剪贴板。";
+
+"REMOVED" = "(已移除)";
+
+"REMOVE_REMOVED_SETTINGS" = "删除已移除的设置";
+"REMOVE_REMOVED_SETTINGS_DESC" = "这将删除 %ld 个在 YouTube 中已不可用的设置。";

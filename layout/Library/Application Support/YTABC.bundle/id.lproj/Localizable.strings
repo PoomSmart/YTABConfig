@@ -33,3 +33,8 @@
 
 // Shown in toast
 "COPIED_TO_CLIPBOARD" = "Disalin ke papan klip.";
+
+"REMOVED" = "(Dihapus)";
+
+"REMOVE_REMOVED_SETTINGS" = "Hapus pengaturan yang dihapus";
+"REMOVE_REMOVED_SETTINGS_DESC" = "Ini akan menghapus %ld pengaturan yang tidak lagi tersedia di YouTube.";

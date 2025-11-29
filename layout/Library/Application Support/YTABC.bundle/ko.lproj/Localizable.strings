@@ -33,3 +33,8 @@
 
 // Shown in toast
 "COPIED_TO_CLIPBOARD" = "클립보드에 복사됨.";
+
+"REMOVED" = "(제거됨)";
+
+"REMOVE_REMOVED_SETTINGS" = "제거된 설정 삭제";
+"REMOVE_REMOVED_SETTINGS_DESC" = "YouTube에서 더 이상 사용할 수 없는 %ld개의 설정을 삭제합니다.";

@@ -33,3 +33,8 @@
 
 // Shown in toast
 "COPIED_TO_CLIPBOARD" = "Panoya kopyalandı.";
+
+"REMOVED" = "(Kaldırıldı)";
+
+"REMOVE_REMOVED_SETTINGS" = "Kaldırılan ayarları sil";
+"REMOVE_REMOVED_SETTINGS_DESC" = "Bu, YouTube'da artık mevcut olmayan %ld ayarı kaldıracak.";

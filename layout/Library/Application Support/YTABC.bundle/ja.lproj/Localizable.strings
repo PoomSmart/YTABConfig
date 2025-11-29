@@ -33,3 +33,8 @@
 
 // Shown in toast
 "COPIED_TO_CLIPBOARD" = "クリップボードにコピーしました";
+
+"REMOVED" = "(削除済み)";
+
+"REMOVE_REMOVED_SETTINGS" = "削除された設定を削除";
+"REMOVE_REMOVED_SETTINGS_DESC" = "YouTubeで利用できなくなった%ld個の設定を削除します。";

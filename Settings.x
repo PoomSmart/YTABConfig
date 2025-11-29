@@ -211,7 +211,7 @@ static NSString *getCategory(char c, NSString *method) {
         }
 
         NSMutableDictionary <NSString *, NSMutableArray <YTSettingsSectionItem *> *> *properties = [NSMutableDictionary dictionaryWithCapacity:EstimatedCategoryCount];
-                updateAllKeys(); // Update once before the loop
+        updateAllKeys(); // Update once before the loop
         for (NSString *classKey in cache) {
             @autoreleasepool { // Drain autorelease pool periodically to reduce peak memory
                 for (NSString *method in cache[classKey]) {
@@ -222,39 +222,39 @@ static NSString *getCategory(char c, NSString *method) {
                     NSString *methodKey = getKey(method, classKey); // Cache the key
                     BOOL modified = [allKeysSet containsObject:methodKey];
                     NSString *modifiedTitle = modified ? [NSString stringWithFormat:@"%@ *", method] : method;
-                YTSettingsSectionItem *methodSwitch = [YTSettingsSectionItemClass switchItemWithTitle:modifiedTitle
-                    titleDescription:isPhone && method.length > LongMethodNameThreshold ? modifiedTitle : nil
-                    accessibilityIdentifier:nil
-                    switchOn:getValue(methodKey)
-                    switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
-                        setValue(method, classKey, enabled);
-                        return YES;
-                    }
-                    selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
-                        NSString *content = [NSString stringWithFormat:KeyFormatString, classKey, method];
-                        YTAlertView *alertView = [YTAlertViewClass confirmationDialog];
-                        alertView.title = method;
-                        alertView.subtitle = content;
-                        [alertView addTitle:LOC(@"COPY_TO_CLIPBOARD") withAction:^{
-                            UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
-                            pasteboard.string = content;
-                            [[%c(GOOHUDManagerInternal) sharedInstance] showMessageMainThread:[%c(YTHUDMessage) messageWithText:LOC(@"COPIED_TO_CLIPBOARD")]];
-                        }];
-                        updateAllKeys();
-                        NSString *key = getKey(method, classKey);
-                        if ([allKeysSet containsObject:key]) {
-                            [alertView addTitle:deleteText withAction:^{
-                                [defaults removeObjectForKey:key];
-                                allKeysNeedsUpdate = YES;
-                                updateAllKeys();
-                            }];
+                    YTSettingsSectionItem *methodSwitch = [YTSettingsSectionItemClass switchItemWithTitle:modifiedTitle
+                        titleDescription:isPhone && method.length > LongMethodNameThreshold ? modifiedTitle : nil
+                        accessibilityIdentifier:nil
+                        switchOn:getValue(methodKey)
+                        switchBlock:^BOOL (YTSettingsCell *cell, BOOL enabled) {
+                            setValue(method, classKey, enabled);
+                            return YES;
                         }
-                        [alertView addCancelButton:NULL];
-                        [alertView show];
-                        return NO;
-                    }
-                    settingItemId:0];
-                [properties[category] addObject:methodSwitch];
+                        selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
+                            NSString *content = [NSString stringWithFormat:KeyFormatString, classKey, method];
+                            YTAlertView *alertView = [YTAlertViewClass confirmationDialog];
+                            alertView.title = method;
+                            alertView.subtitle = content;
+                            [alertView addTitle:LOC(@"COPY_TO_CLIPBOARD") withAction:^{
+                                UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
+                                pasteboard.string = content;
+                                [[%c(GOOHUDManagerInternal) sharedInstance] showMessageMainThread:[%c(YTHUDMessage) messageWithText:LOC(@"COPIED_TO_CLIPBOARD")]];
+                            }];
+                            updateAllKeys();
+                            NSString *key = getKey(method, classKey);
+                            if ([allKeysSet containsObject:key]) {
+                                [alertView addTitle:deleteText withAction:^{
+                                    [defaults removeObjectForKey:key];
+                                    allKeysNeedsUpdate = YES;
+                                    updateAllKeys();
+                                }];
+                            }
+                            [alertView addCancelButton:NULL];
+                            [alertView show];
+                            return NO;
+                        }
+                        settingItemId:0];
+                    [properties[category] addObject:methodSwitch];
                 }
             } // @autoreleasepool
         }
@@ -382,7 +382,6 @@ static NSString *getCategory(char c, NSString *method) {
                 NSArray *sortedDisplayKeys = [[modifiedKeysMap allKeys] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
                 NSMutableArray <YTSettingsSectionItem *> *modifiedRows = [NSMutableArray arrayWithCapacity:sortedDisplayKeys.count + 2]; // +2 for copy and info items
 
-
                 // Copy to clipboard item
                 YTSettingsSectionItem *copyItem = [YTSettingsSectionItemClass itemWithTitle:LOC(@"COPY_TO_CLIPBOARD")
                     titleDescription:nil
@@ -401,6 +400,41 @@ static NSString *getCategory(char c, NSString *method) {
                     }];
                 [modifiedRows addObject:copyItem];
 
+                // Remove removed settings item
+                NSMutableArray *removedFullKeys = [NSMutableArray array];
+                for (NSString *displayKey in sortedDisplayKeys) {
+                    NSArray *components = [displayKey componentsSeparatedByString:@"."];
+                    if (components.count > 1) {
+                        NSString *classKey = components[0];
+                        NSString *methodKey = [displayKey substringFromIndex:classKey.length + 1];
+                        if (!cache[classKey][methodKey]) {
+                            [removedFullKeys addObject:modifiedKeysMap[displayKey]];
+                        }
+                    }
+                }
+
+                if (removedFullKeys.count > 0) {
+                    YTSettingsSectionItem *removeRemovedItem = [YTSettingsSectionItemClass itemWithTitle:LOC(@"REMOVE_REMOVED_SETTINGS")
+                        titleDescription:nil
+                        accessibilityIdentifier:nil
+                        detailTextBlock:nil
+                        selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
+                            YTAlertView *alertView = [YTAlertViewClass confirmationDialogWithAction:^{
+                                for (NSString *key in removedFullKeys) {
+                                    [defaults removeObjectForKey:key];
+                                }
+                                allKeysNeedsUpdate = YES;
+                                updateAllKeys();
+                                [settingsViewController.navigationController popViewControllerAnimated:YES];
+                            } actionTitle:deleteText];
+                            alertView.title = LOC(@"REMOVE_REMOVED_SETTINGS");
+                            alertView.subtitle = [NSString stringWithFormat:LOC(@"REMOVE_REMOVED_SETTINGS_DESC"), (long)removedFullKeys.count];
+                            [alertView show];
+                            return YES;
+                        }];
+                    [modifiedRows addObject:removeRemovedItem];
+                }
+
                 // General information item
                 NSString *infoDescription = [NSString stringWithFormat:LOC(@"TOTAL_MODIFIED_SETTINGS"), sortedDisplayKeys.count];
                 YTSettingsSectionItem *infoItem = [YTSettingsSectionItemClass itemWithTitle:nil
@@ -417,7 +451,16 @@ static NSString *getCategory(char c, NSString *method) {
                     NSArray *components = [displayKey componentsSeparatedByString:@"."];
                     NSString *method = components.count > 1 ? components[1] : displayKey;
 
-                    YTSettingsSectionItem *toggleItem = [YTSettingsSectionItemClass switchItemWithTitle:displayKey
+                    BOOL isRemoved = NO;
+                    if (components.count > 1) {
+                        NSString *classKey = components[0];
+                        NSString *methodKey = [displayKey substringFromIndex:classKey.length + 1];
+                        if (!cache[classKey][methodKey])
+                            isRemoved = YES;
+                    }
+
+                    NSString *title = isRemoved ? [NSString stringWithFormat:@"%@ %@", displayKey, [tweakBundle localizedStringForKey:@"REMOVED" value:@"(Removed)" table:nil]] : displayKey;
+                    YTSettingsSectionItem *toggleItem = [YTSettingsSectionItemClass switchItemWithTitle:title
                         titleDescription:isPhone && displayKey.length > 26 ? displayKey : nil
                         accessibilityIdentifier:nil
                         switchOn:[defaults boolForKey:fullKey]
@@ -447,6 +490,7 @@ static NSString *getCategory(char c, NSString *method) {
                             return NO;
                         }
                         settingItemId:0];
+                    toggleItem.enabled = !isRemoved;
                     [modifiedRows addObject:toggleItem];
                 }
 

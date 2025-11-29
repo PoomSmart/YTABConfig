@@ -33,3 +33,8 @@
 
 // Shown in toast
 "COPIED_TO_CLIPBOARD" = "Đã sao chép vào bảng nhớ tạm.";
+
+"REMOVED" = "(Đã xóa)";
+
+"REMOVE_REMOVED_SETTINGS" = "Xóa các cài đặt đã bị xóa";
+"REMOVE_REMOVED_SETTINGS_DESC" = "Thao tác này sẽ xóa %ld cài đặt không còn khả dụng trong YouTube.";

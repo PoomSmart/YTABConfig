@@ -33,3 +33,8 @@
 
 // Shown in toast
 "COPIED_TO_CLIPBOARD" = "Copiado al portapapeles";
+
+"REMOVED" = "(Eliminado)";
+
+"REMOVE_REMOVED_SETTINGS" = "Eliminar ajustes eliminados";
+"REMOVE_REMOVED_SETTINGS_DESC" = "Esto eliminará %ld ajustes que ya no están disponibles en YouTube.";

@@ -33,3 +33,8 @@
 
 // Shown in toast
 "COPIED_TO_CLIPBOARD" = "تم النسخ.";
+
+"REMOVED" = "(تمت إزالته)";
+
+"REMOVE_REMOVED_SETTINGS" = "إزالة الإعدادات المحذوفة";
+"REMOVE_REMOVED_SETTINGS_DESC" = "سيؤدي هذا إلى إزالة %ld إعدادات لم تعد متاحة في YouTube.";

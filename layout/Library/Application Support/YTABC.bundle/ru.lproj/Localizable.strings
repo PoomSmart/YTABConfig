@@ -33,3 +33,8 @@
 
 // Shown in toast
 "COPIED_TO_CLIPBOARD" = "Скопировано в буфер обмена";
+
+"REMOVED" = "(Удалено)";
+
+"REMOVE_REMOVED_SETTINGS" = "Удалить удалённые настройки";
+"REMOVE_REMOVED_SETTINGS_DESC" = "Будет удалено %ld настроек, которые больше не доступны в YouTube.";

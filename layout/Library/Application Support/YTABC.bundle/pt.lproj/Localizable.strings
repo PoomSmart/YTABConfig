@@ -33,3 +33,8 @@
 
 // Shown in toast
 "COPIED_TO_CLIPBOARD" = "Copiado para a área de transferência.";
+
+"REMOVED" = "(Removido)";
+
+"REMOVE_REMOVED_SETTINGS" = "Remover configurações removidas";
+"REMOVE_REMOVED_SETTINGS_DESC" = "Isso removerá %ld configurações que não estão mais disponíveis no YouTube.";

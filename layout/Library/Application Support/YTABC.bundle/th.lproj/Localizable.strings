@@ -33,3 +33,8 @@
 
 // Shown in toast
 "COPIED_TO_CLIPBOARD" = "คัดลอกไปยังคลิปบอร์ดแล้ว";
+
+"REMOVED" = "(ถูกลบออก)";
+
+"REMOVE_REMOVED_SETTINGS" = "ลบการตั้งค่าที่ถูกลบออก";
+"REMOVE_REMOVED_SETTINGS_DESC" = "การดำเนินการนี้จะลบการตั้งค่า %ld รายการที่ไม่มีใน YouTube อีกต่อไป";

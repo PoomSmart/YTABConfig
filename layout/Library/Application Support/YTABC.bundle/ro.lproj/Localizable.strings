@@ -33,3 +33,8 @@
 
 // Shown in toast
 "COPIED_TO_CLIPBOARD" = "Copiat în clipboard.";
+
+"REMOVED" = "(Eliminat)";
+
+"REMOVE_REMOVED_SETTINGS" = "Eliminare setări eliminate";
+"REMOVE_REMOVED_SETTINGS_DESC" = "Aceasta va elimina %ld setări care nu mai sunt disponibile în YouTube.";
