@@ -11,6 +11,7 @@
 #import <YouTubeHeader/YTSettingsViewController.h>
 #import <YouTubeHeader/YTUIUtils.h>
 #import <YouTubeHeader/YTVersionUtils.h>
+#import <pthread.h>
 
 #define Prefix @"YTABC"
 #define EnabledKey @"EnabledYTABC"
@@ -41,6 +42,7 @@ NSSortDescriptor *titleSortDescriptor;
 NSRegularExpression *importRegex;
 NSMutableDictionary <NSString *, NSString *> *categoryCache; // Memoize category results
 NSUInteger prefixLength; // Cache prefix length
+pthread_mutex_t cacheMutex;
 
 BOOL tweakEnabled() {
     return [defaults boolForKey:EnabledKey];
@@ -62,11 +64,13 @@ NSBundle *YTABCBundle() {
 
 NSString *getKey(NSString *method, NSString *classKey) {
     NSString *cacheKey = [NSString stringWithFormat:KeyFormatString, classKey, method];
+    pthread_mutex_lock(&cacheMutex);
     NSString *fullKey = keyCache[cacheKey];
     if (!fullKey) {
         fullKey = [NSString stringWithFormat:FullKeyFormatString, Prefix, classKey, method];
         keyCache[cacheKey] = fullKey;
     }
+    pthread_mutex_unlock(&cacheMutex);
     return fullKey;
 }
 
@@ -76,37 +80,51 @@ static NSString *getCacheKey(NSString *method, NSString *classKey) {
 
 BOOL getValue(NSString *methodKey) {
     if (!methodKey) return NO;
-    if (![allKeysSet containsObject:methodKey]) {
+    pthread_mutex_lock(&cacheMutex);
+    BOOL contains = [allKeysSet containsObject:methodKey];
+    BOOL result = NO;
+    if (!contains) {
         NSString *keyPath = [methodKey substringFromIndex:prefixLength + 1];
         id value = [cache valueForKeyPath:keyPath];
-        return value ? [value boolValue] : NO;
+        result = value ? [value boolValue] : NO;
+    } else {
+        result = [defaults boolForKey:methodKey];
     }
-    return [defaults boolForKey:methodKey];
+    pthread_mutex_unlock(&cacheMutex);
+    return result;
 }
 
 static void setValue(NSString *method, NSString *classKey, BOOL value) {
+    pthread_mutex_lock(&cacheMutex);
     [cache setValue:@(value) forKeyPath:getCacheKey(method, classKey)];
+    pthread_mutex_unlock(&cacheMutex);
     [defaults setBool:value forKey:getKey(method, classKey)];
     allKeysNeedsUpdate = YES;
 }
 
 static void setValueFromImport(NSString *settingKey, BOOL value) {
+    pthread_mutex_lock(&cacheMutex);
     [cache setValue:@(value) forKeyPath:settingKey];
+    pthread_mutex_unlock(&cacheMutex);
     [defaults setBool:value forKey:[NSString stringWithFormat:KeyFormatString, Prefix, settingKey]];
     allKeysNeedsUpdate = YES;
 }
 
 void updateAllKeys() {
+    pthread_mutex_lock(&cacheMutex);
     if (allKeysNeedsUpdate) {
         NSArray *keys = [defaults dictionaryRepresentation].allKeys;
         allKeysSet = [NSSet setWithArray:keys];
         allKeysNeedsUpdate = NO;
     }
+    pthread_mutex_unlock(&cacheMutex);
 }
 
 static void clearCaches() {
+    pthread_mutex_lock(&cacheMutex);
     [keyCache removeAllObjects];
     [categoryCache removeAllObjects];
+    pthread_mutex_unlock(&cacheMutex);
 }
 
 %group Search
@@ -631,6 +649,12 @@ void SearchHook() {
     categoryCache = [NSMutableDictionary new];
     titleSortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"title" ascending:YES];
     importRegex = [NSRegularExpression regularExpressionWithPattern:@"^(YT.*Config\\..*):\\s*(\\d)$" options:0 error:nil];
+    
+    pthread_mutexattr_t attr;
+    pthread_mutexattr_init(&attr);
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+    pthread_mutex_init(&cacheMutex, &attr);
+    pthread_mutexattr_destroy(&attr);
 
     // Clear caches on memory warning to reduce memory footprint
     [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidReceiveMemoryWarningNotification

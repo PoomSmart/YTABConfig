@@ -3,6 +3,9 @@
 #import <YouTubeHeader/YTColdConfig.h>
 #import <YouTubeHeader/YTHotConfig.h>
 #import <substrate.h>
+#import <pthread.h>
+
+extern pthread_mutex_t cacheMutex;
 
 NSMutableDictionary <NSString *, NSMutableDictionary <NSString *, NSNumber *> *> *cache;
 
@@ -66,6 +69,7 @@ static void hookClass(NSObject *instance) {
     Class instanceClass = [instance class];
     NSMutableArray <NSString *> *methods = getBooleanMethods(instanceClass);
     NSString *classKey = NSStringFromClass(instanceClass);
+    pthread_mutex_lock(&cacheMutex);
     NSMutableDictionary *classCache = cache[classKey] = [NSMutableDictionary new];
     for (NSString *method in methods) {
         SEL selector = NSSelectorFromString(method);
@@ -73,6 +77,7 @@ static void hookClass(NSObject *instance) {
         classCache[method] = @(result);
         MSHookMessageEx(instanceClass, selector, (IMP)returnFunction, NULL);
     }
+    pthread_mutex_unlock(&cacheMutex);
 }
 
 %hook YTAppDelegate
