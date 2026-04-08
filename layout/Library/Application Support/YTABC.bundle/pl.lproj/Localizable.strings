@@ -1,0 +1,40 @@
+"ENABLED" = "Włączone";
+"ENABLED_DESC" = "Włącz, aby wyświetlać ustawienia A/B.";
+"GROUPED" = "Ustawienia pogrupowane według prefiksów";
+"RESET_KILL" = "Resetuj i zamknij";
+"RESET_KILL_DESC" = "Stuknij, aby cofnąć wszystkie zmiany i zamknąć aplikację.";
+"COPY_CURRENT_SETTINGS" = "Skopiuj bieżące ustawienia";
+"COPY_CURRENT_SETTINGS_DESC" = "Stuknij, aby skopiować bieżące ustawienia do schowka.";
+"VIEW_MODIFIED_SETTINGS" = "Pokaż zmodyfikowane ustawienia";
+"VIEW_MODIFIED_SETTINGS_DESC" = "Stuknij, aby zobaczyć wszystkie zmiany wprowadzone ręcznie.";
+"IMPORT_SETTINGS" = "Importuj ustawienia";
+"IMPORT_SETTINGS_DESC" = "Importuj ustawienia ze schowka.\nKażde ustawienie musi mieć format: %@";
+"NOTHING_TO_IMPORT" = "Nic nie znaleziono w schowku albo po imporcie nie będzie żadnych zmian.";
+"SETTINGS_TO_IMPORT" = "Ustawienia do importu";
+"SETTINGS_TO_IMPORT_DESC" = "Znaleziono %ld prawidłowych ustawień do importu.";
+"IMPORT" = "Importuj";
+
+// Shown in alert
+"MODIFIED_SETTINGS_TITLE" = "Zmiany";
+"TOTAL_MODIFIED_SETTINGS" = "Łącznie: %ld";
+
+// Quit app alert
+"WARNING" = "Ostrzeżenie";
+"APPLY_DESC" = "Ta operacja zamknie YouTube. Czy na pewno chcesz kontynuować?";
+
+"OPEN_MEGATHREAD" = "Otwórz megawątek";
+"OPEN_MEGATHREAD_DESC" = "Otwórz megawątek YTABConfig na GitHubie, gdzie możesz udostępniać i omawiać efekt włączenia lub wyłączenia każdego ustawienia.";
+"SETTINGS_START_WITH" = "Ustawienia zaczynające się od";
+
+// Clipboard
+
+// Shown in alert
+"COPY_TO_CLIPBOARD" = "Kopiuj do schowka";
+
+// Shown in toast
+"COPIED_TO_CLIPBOARD" = "Skopiowano do schowka.";
+
+"REMOVED" = "(Usunięto)";
+
+"REMOVE_REMOVED_SETTINGS" = "Usuń usunięte ustawienia";
+"REMOVE_REMOVED_SETTINGS_DESC" = "To usunie %ld ustawień, które nie są już dostępne w YouTube.";
